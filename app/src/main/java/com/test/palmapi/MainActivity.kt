@@ -1,8 +1,12 @@
 package com.test.palmapi
 
+import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,24 +28,51 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    private lateinit var requestAccessibilityPermissionLauncher: ActivityResultLauncher<Intent>
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            PalmApiTheme {
-                // A surface container using the 'background' color from the theme
-                val viewModel: MainViewModel = hiltViewModel()
-                LaunchedEffect(key1 = Unit){
-                    viewModel.getApiData()
-                }
-                LazyColumn(modifier = Modifier.fillMaxSize()){
-                    items(viewModel.apiData.value?.candidates?.size ?: 0) { index ->
-                        Text(text = viewModel.apiData.value?.candidates?.get(index)?.output ?: "No Data",
-                            color = Color.Black,
-                            fontSize = 25.sp)
+        requestAccessibilityPermissionLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (isAccessibilityPermissionGranted()) {
+                    setContent {
+                        PalmApiTheme {
+                            // A surface container using the 'background' color from the theme
+                            val viewModel: MainViewModel = hiltViewModel()
+//                            LaunchedEffect(key1 = Unit){
+////                                viewModel.getApiData()
+//                            }
+//                            LazyColumn(modifier = Modifier.fillMaxSize()){
+//                                items(viewModel.apiData.value?.candidates?.size ?: 0) { index ->
+//                                    Text(text = viewModel.apiData.value?.candidates?.get(index)?.output ?: "No Data",
+//                                        color = Color.Black,
+//                                        fontSize = 25.sp)
+//                                }
+//                            }
+                        }
                     }
+                } else {
+                    // Accessibility permission not granted, handle the failure case here
                 }
             }
+
+
+    }
+    override fun onResume() {
+        super.onResume()
+
+        if (!isAccessibilityPermissionGranted()) {
+            requestAccessibilityPermission()
         }
+    }
+    private fun isAccessibilityPermissionGranted(): Boolean {
+        val accessibilityEnabled =
+            Settings.Secure.getInt(contentResolver, Settings.Secure.ACCESSIBILITY_ENABLED, 0)
+        return accessibilityEnabled == 1
+    }
+
+    private fun requestAccessibilityPermission() {
+        val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+        requestAccessibilityPermissionLauncher.launch(intent)
     }
 }
 
