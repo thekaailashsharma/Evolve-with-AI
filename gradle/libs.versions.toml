@@ -9,11 +9,22 @@ lifecycle-runtime-ktx = "2.6.1"
 activity-compose = "1.7.2"
 compose-bom = "2023.06.01"
 ktor-version = "1.6.4"
+coil = "2.2.2"
 dagger = "2.45"
+accompanist = "0.28.0"
+extended-icons = "1.4.3"
+firebase-auth-ktx = "22.0.0"
+firebase-bom = "32.1.1"
+play-services-auth = "20.5.0"
+room-version = "2.5.0"
 
 [libraries]
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
+accompanist-navigation = { group = "com.google.accompanist", name = "accompanist-navigation-animation", version.ref = "accompanist" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
+firebase-bom  = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebase-bom" }
+lottie = { group = "com.airbnb.android", name = "lottie-compose", version = "5.2.0" }
+material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended", version.ref = "extended-icons" }
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-ext-junit" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
 ktor-client-android = { group = "io.ktor", name = "ktor-client-android", version.ref = "ktor-version" }
@@ -29,6 +40,10 @@ viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-
 lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle-runtime-ktx" }
 activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity-compose" }
 compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
+coilx = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
+room-runtime  = { group = "androidx.room", name = "room-runtime", version.ref = "room-version" }
+room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room-version" }
+room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room-version" }
 ui = { group = "androidx.compose.ui", name = "ui" }
 ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
@@ -36,6 +51,8 @@ ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview
 ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 material3 = { group = "androidx.compose.material3", name = "material3" }
+firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx", version.ref = "firebase-auth-ktx" }
+play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "play-services-auth" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.test.palmapi.navigation.NavController
 import com.test.palmapi.ui.theme.PalmApiTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -31,39 +32,28 @@ class MainActivity : ComponentActivity() {
     private lateinit var requestAccessibilityPermissionLauncher: ActivityResultLauncher<Intent>
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        requestAccessibilityPermissionLauncher =
-            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-                if (isAccessibilityPermissionGranted()) {
+//        requestAccessibilityPermissionLauncher =
+//            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+//                if (isAccessibilityPermissionGranted()) {
                     setContent {
                         PalmApiTheme {
-                            // A surface container using the 'background' color from the theme
-                            val viewModel: MainViewModel = hiltViewModel()
-//                            LaunchedEffect(key1 = Unit){
-////                                viewModel.getApiData()
-//                            }
-//                            LazyColumn(modifier = Modifier.fillMaxSize()){
-//                                items(viewModel.apiData.value?.candidates?.size ?: 0) { index ->
-//                                    Text(text = viewModel.apiData.value?.candidates?.get(index)?.output ?: "No Data",
-//                                        color = Color.Black,
-//                                        fontSize = 25.sp)
-//                                }
-//                            }
+                            NavController()
                         }
                     }
-                } else {
-                    // Accessibility permission not granted, handle the failure case here
-                }
-            }
+//                } else {
+//                    // Accessibility permission not granted, handle the failure case here
+//                }
+//            }
 
 
     }
-    override fun onResume() {
-        super.onResume()
-
-        if (!isAccessibilityPermissionGranted()) {
-            requestAccessibilityPermission()
-        }
-    }
+//    override fun onResume() {
+//        super.onResume()
+//
+//        if (!isAccessibilityPermissionGranted()) {
+//            requestAccessibilityPermission()
+//        }
+//    }
     private fun isAccessibilityPermissionGranted(): Boolean {
         val accessibilityEnabled =
             Settings.Secure.getInt(contentResolver, Settings.Secure.ACCESSIBILITY_ENABLED, 0)

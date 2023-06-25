@@ -4,6 +4,8 @@ plugins {
     alias(libs.plugins.kotlinAndroid)
     id("dagger.hilt.android.plugin")
     kotlin("kapt")
+    id("com.google.gms.google-services")
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -38,6 +40,9 @@ android {
     }
     kotlinOptions {
         jvmTarget = "17"
+    }
+    ksp {
+
     }
     kapt {
         correctErrorTypes = true
@@ -80,10 +85,33 @@ dependencies {
     //ViewModel Compose
     implementation(libs.viewmodel.compose)
 
+    //Navigation Compose
+    implementation(libs.accompanist.navigation)
+
+    // Material Icons Extended
+    implementation(libs.material.icons.extended)
+
+    //Firebase
+    implementation(platform(libs.firebase.bom))
+
+    //Coil
+    implementation(libs.coilx)
+
+    //Room
+    implementation(libs.room.runtime)
+    annotationProcessor(libs.room.compiler)
+    ksp(libs.room.compiler)
+    implementation(libs.room.ktx)
+
     //Dagger Hilt
     implementation(libs.dagger.hilt)
+    implementation(libs.firebase.auth.ktx)
+    implementation(libs.play.services.auth)
     kapt(libs.dagger.hilt.kapt)
     implementation(libs.dagger.hilt.navigation)
+
+    //Lottie Animation
+    implementation(libs.lottie)
 
 
     //Test Android

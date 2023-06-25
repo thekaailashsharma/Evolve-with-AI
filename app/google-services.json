@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "887271237443",
+    "project_id": "palmapi-b548f",
+    "storage_bucket": "palmapi-b548f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:887271237443:android:ae98150a7b1fe4a4f9b1f6",
+        "android_client_info": {
+          "package_name": "com.test.palmapi"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "887271237443-mm1p29bkn5t8t7j4rk43b2em6vckhg9h.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC0W4pZhyrDJdEnXVHwNfHogr5Pmwq_qxs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "887271237443-mm1p29bkn5t8t7j4rk43b2em6vckhg9h.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

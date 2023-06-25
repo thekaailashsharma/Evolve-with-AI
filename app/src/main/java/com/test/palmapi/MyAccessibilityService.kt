@@ -1,4 +1,4 @@
-package com.test.palmapi.ui.theme
+package com.test.palmapi
 
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.AccessibilityServiceInfo
@@ -8,15 +8,12 @@ import android.app.NotificationManager
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.os.Build
 import androidx.core.app.NotificationCompat
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
-import com.test.palmapi.R
 import com.test.palmapi.dto.ApiPrompt
 import com.test.palmapi.dto.PalmApi
 import com.test.palmapi.dto.Prompt
-import com.test.palmapi.repository.ApiRoutes
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.features.HttpTimeout
@@ -24,7 +21,6 @@ import io.ktor.client.features.json.GsonSerializer
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.features.logging.Logging
 import io.ktor.client.features.websocket.WebSockets
-import io.ktor.client.request.get
 import io.ktor.client.request.headers
 import io.ktor.client.request.post
 import io.ktor.client.request.url
@@ -57,7 +53,7 @@ class MyAccessibilityService : AccessibilityService() {
             requestTimeoutMillis = 300000 // Increase the timeout value as needed
         }
     }
-    val apiEndpoint =
+    private val apiEndpoint =
         "https://generativelanguage.googleapis.com/v1beta2/models/text-bison-001:generateText?key=AIzaSyD3Uedh-W7B2T9BHuls61gMBtGMrgtwei8"
 
     @OptIn(DelicateCoroutinesApi::class)
@@ -150,15 +146,13 @@ class MyAccessibilityService : AccessibilityService() {
 
     // Create a notification channel for Android Oreo and higher
     private fun createNotificationChannel(context: Context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                CHANNEL_ID,
-                CHANNEL_NAME,
-                NotificationManager.IMPORTANCE_DEFAULT
-            )
-            val notificationManager = context.getSystemService(NotificationManager::class.java)
-            notificationManager?.createNotificationChannel(channel)
-        }
+        val channel = NotificationChannel(
+            CHANNEL_ID,
+            CHANNEL_NAME,
+            NotificationManager.IMPORTANCE_DEFAULT
+        )
+        val notificationManager = context.getSystemService(NotificationManager::class.java)
+        notificationManager?.createNotificationChannel(channel)
     }
 
     // Create and display the notification
