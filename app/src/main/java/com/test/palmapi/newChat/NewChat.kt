@@ -1,6 +1,10 @@
 package com.test.palmapi.newChat
 
+import android.content.Intent
 import android.util.Log
+import android.widget.Toast
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -51,11 +55,16 @@ import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -78,6 +87,7 @@ import com.test.palmapi.ui.theme.monteBold
 import com.test.palmapi.ui.theme.monteNormal
 import com.test.palmapi.ui.theme.monteSB
 import com.test.palmapi.ui.theme.textColor
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
@@ -92,21 +102,14 @@ fun NewChat(
     val lazyListState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
     val result by viewModel.allMessages.collectAsState(initial = listOf())
-    var isContextMenuVisible by rememberSaveable {
-        mutableStateOf(false)
-    }
-    var pressOffset by remember {
-        mutableStateOf(DpOffset.Zero)
-    }
-    var itemHeight by remember {
-        mutableStateOf(0.dp)
-    }
-    val interactionSource = remember {
-        MutableInteractionSource()
-    }
-    val density = LocalDensity.current
     LaunchedEffect(key1 = result) {
-        lazyListState.animateScrollToItem(result.size - 1)
+        try {
+            if (result.isNotEmpty()) {
+                lazyListState.animateScrollToItem(result.size - 1)
+            }
+        } catch (e: Exception) {
+            Log.i("Message", e.toString())
+        }
     }
     Log.i("ProfileImage", user?.photoUrl.toString())
     Scaffold(
@@ -129,7 +132,13 @@ fun NewChat(
                     viewModel.message.value = text.text
                     viewModel.getApiData()
                     coroutineScope.launch {
-                        lazyListState.animateScrollToItem(result.size - 1)
+                        try {
+                            if (result.isNotEmpty()) {
+                                lazyListState.animateScrollToItem(result.size - 1)
+                            }
+                        } catch (e: Exception) {
+                            Log.i("Message", e.toString())
+                        }
                     }
                     text = TextFieldValue("")
 
@@ -195,6 +204,11 @@ fun NewChat(
                     description = "Your Privacy is completely secured"
                 )
                 Spacer(modifier = Modifier.height(10.dp))
+                RepeatedCard(
+                    icon = R.drawable.tip,
+                    description = "Long Press on Chat to see options"
+                )
+                Spacer(modifier = Modifier.height(10.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center
@@ -213,10 +227,7 @@ fun NewChat(
                 modifier = Modifier
                     .background(appGradient)
                     .fillMaxSize()
-                    .padding(top = 30.dp)
-                    .clickable {
-                        isContextMenuVisible = false
-                    },
+                    .padding(top = 30.dp),
                 contentPadding = PaddingValues(top = 40.dp, bottom = 130.dp),
                 state = lazyListState,
             ) {
@@ -226,6 +237,7 @@ fun NewChat(
                         isUser = message.isUser,
                         viewModel = viewModel,
                         imageUrl = user?.photoUrl.toString(),
+                        time = message.time
                     )
                 }
 
@@ -239,6 +251,7 @@ fun ChatCard(
     text: String,
     isUser: Boolean,
     imageUrl: String,
+    time: Long,
     viewModel: MainViewModel
 ) {
     var isContextMenuVisible by rememberSaveable {
@@ -254,6 +267,19 @@ fun ChatCard(
         MutableInteractionSource()
     }
     val density = LocalDensity.current
+    val width = LocalDensity.current.run {
+        LocalConfiguration.current.screenWidthDp.dp.toPx()
+    }
+    var deleted by remember {
+        mutableStateOf(false)
+    }
+    val coroutineScope = rememberCoroutineScope()
+
+    val translation by animateFloatAsState(
+        targetValue = if (deleted) (width) else 0f,
+        animationSpec = tween(850),
+        label = "Right Translation"
+    )
     Row(
         horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start,
         verticalAlignment = Alignment.Top,
@@ -302,6 +328,9 @@ fun ChatCard(
                 if (viewModel.isBlurred.value && !isContextMenuVisible)
                     Modifier.blur(10.dp, 10.dp, BlurredEdgeTreatment.Unbounded) else Modifier
             )
+            .then(if (deleted) Modifier.graphicsLayer {
+                translationX = translation
+            } else Modifier)
     ) {
         if (!isUser) {
             ProfileImage(
@@ -319,21 +348,23 @@ fun ChatCard(
         }
         Card(
             modifier = Modifier
-                .then(if (isUser) Modifier
-                    .fillMaxWidth(0.86f)
-                    .padding(
-                        start = 7.dp,
-                        end = 7.dp,
-                        top = 0.dp,
-                        bottom = 7.dp
-                    ) else Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        start = 7.dp,
-                        end = 7.dp,
-                        top = 0.dp,
-                        bottom = 7.dp
-                    )),
+                .then(
+                    if (isUser) Modifier
+                        .fillMaxWidth(0.86f)
+                        .padding(
+                            start = 7.dp,
+                            end = 7.dp,
+                            top = 0.dp,
+                            bottom = 7.dp
+                        ) else Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            start = 7.dp,
+                            end = 7.dp,
+                            top = 0.dp,
+                            bottom = 7.dp
+                        )
+                ),
             colors = CardDefaults.cardColors(
                 containerColor = Color.Transparent
             ),
@@ -361,7 +392,7 @@ fun ChatCard(
             ProfileImage(
                 imageUrl = imageUrl,
                 modifier = Modifier
-                    .size(30.dp)
+                    .size(35.dp)
                     .border(
                         width = 1.dp,
                         color = textColor.copy(0.5f),
@@ -378,6 +409,17 @@ fun ChatCard(
                 offset = pressOffset.copy(
                     y = pressOffset.y - itemHeight
                 ),
+                text = text,
+                onDelete = {
+                    deleted = true
+                    coroutineScope.launch {
+                        delay(850)
+                        viewModel.deleteChat(time)
+                        isContextMenuVisible = false
+                        viewModel.isBlurred.value = false
+                        deleted = false
+                    }
+                },
                 onDismissRequest = {
                     isContextMenuVisible = false
                     viewModel.isBlurred.value = false
@@ -391,8 +433,12 @@ fun ChatCard(
 fun ContextMenu(
     isContextMenuVisible: Boolean,
     onDismissRequest: () -> Unit = {},
-    offset: DpOffset
+    offset: DpOffset,
+    onDelete: () -> Unit = {},
+    text: String
 ) {
+    val clipboardManager = LocalClipboardManager.current
+    val context = LocalContext.current
     DropdownMenu(
         expanded = isContextMenuVisible,
         onDismissRequest = {
@@ -404,29 +450,56 @@ fun ContextMenu(
     ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
-            modifier = Modifier.padding(vertical = 4.dp, horizontal = 10.dp).background(appGradient)
+            modifier = Modifier
+                .padding(vertical = 4.dp, horizontal = 10.dp)
+                .background(appGradient)
         ) {
             ContextMenuCard(
                 imageVector = Icons.Outlined.ContentCopy,
-                contentDescription = "Copy"
+                contentDescription = "Copy",
+                onCLick = {
+                    clipboardManager.setText(AnnotatedString(text))
+                    Toast.makeText(context, "Copied Successfully", Toast.LENGTH_SHORT).show()
+                    onDismissRequest()
+                }
             )
             ContextMenuCard(
                 imageVector = Icons.Outlined.Delete,
-                contentDescription = "Delete"
+                contentDescription = "Delete",
+                onCLick = {
+                    onDelete()
+                }
             )
             ContextMenuCard(
                 imageVector = Icons.Outlined.IosShare,
-                contentDescription = "Share"
+                contentDescription = "Share",
+                onCLick = {
+                    val sendIntent: Intent = Intent().apply {
+                        action = Intent.ACTION_SEND
+                        putExtra(Intent.EXTRA_TEXT, text)
+                        type = "text/plain"
+                    }
+                    val shareIntent = Intent.createChooser(sendIntent, "Shared from Evolve")
+                    context.startActivity(shareIntent)
+                }
             )
         }
     }
 }
 
 @Composable
-fun ContextMenuCard(imageVector: ImageVector, contentDescription: String) {
+fun ContextMenuCard(
+    imageVector: ImageVector,
+    contentDescription: String,
+    onCLick: () -> Unit = {}
+) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(vertical = 2.dp)
+        modifier = Modifier
+            .padding(vertical = 2.dp)
+            .clickable {
+                onCLick()
+            }
     ) {
         Icon(
             imageVector = imageVector,

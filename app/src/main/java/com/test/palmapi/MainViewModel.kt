@@ -53,11 +53,13 @@ class MainViewModel @Inject constructor(
                     )
                 )
             )
-            saveChat(ChatMessage(
-                time = System.currentTimeMillis(),
-                message = apiData.value?.candidates?.get(0)?.output,
-                isUser = false
-            ))
+            saveChat(
+                ChatMessage(
+                    time = System.currentTimeMillis(),
+                    message = apiData.value?.candidates?.get(0)?.output ?: "Something went wrong.",
+                    isUser = false
+                )
+            )
 
             Log.i("Messages API Called", listOfMessages.value.toString())
             delay(2000)
@@ -65,9 +67,15 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun saveChat(chatMessage: ChatMessage){
+    fun saveChat(chatMessage: ChatMessage) {
         viewModelScope.launch {
-            dbRepository.insertHistory(chatMessage)
+            dbRepository.insertMessage(chatMessage)
+        }
+    }
+
+    fun deleteChat(time: Long) {
+        viewModelScope.launch {
+            dbRepository.deleteMessage(time)
         }
     }
 }

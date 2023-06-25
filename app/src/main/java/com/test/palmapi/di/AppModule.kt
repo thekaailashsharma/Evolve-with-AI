@@ -8,6 +8,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
+import io.ktor.client.features.HttpTimeout
 import io.ktor.client.features.json.GsonSerializer
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.features.logging.Logging
@@ -29,6 +30,9 @@ object AppModule {
                     setPrettyPrinting()
                     disableHtmlEscaping()
                 }
+            }
+            install(HttpTimeout) {
+                requestTimeoutMillis = 10000
             }
         }
     }

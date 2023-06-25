@@ -9,9 +9,15 @@ import kotlinx.coroutines.launch
 class DatabaseRepo(private val chatDao: ChatDao) {
     val allMessages: Flow<List<ChatMessage>> = chatDao.getAllChatMessages()
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
-    fun insertHistory(chatMessage: ChatMessage) {
+    fun insertMessage(chatMessage: ChatMessage) {
         coroutineScope.launch {
             chatDao.insertChatMessage(chatMessage)
+        }
+    }
+
+    fun deleteMessage(time: Long) {
+        coroutineScope.launch {
+            chatDao.deleteChatMessage(time)
         }
     }
 

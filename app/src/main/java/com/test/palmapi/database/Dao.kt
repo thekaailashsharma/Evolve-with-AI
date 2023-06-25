@@ -12,6 +12,9 @@ interface ChatDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertChatMessage(chatMessage: ChatMessage)
 
+    @Query("DELETE FROM chat_message WHERE time = :time")
+    suspend fun deleteChatMessage(time: Long)
+
     @Query("SELECT * FROM chat_message")
     fun getAllChatMessages(): Flow<List<ChatMessage>>
 
