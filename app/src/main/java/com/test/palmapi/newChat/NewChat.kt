@@ -5,10 +5,8 @@ import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.PressGestureScope
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.indication
-import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
@@ -20,7 +18,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -29,11 +26,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.CopyAll
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreHoriz
-import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.IosShare
@@ -57,7 +50,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
@@ -70,8 +62,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.DpOffset
-import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -81,17 +71,13 @@ import com.google.firebase.ktx.Firebase
 import com.test.palmapi.MainViewModel
 import com.test.palmapi.R
 import com.test.palmapi.database.ChatMessage
-import com.test.palmapi.dto.Candidate
 import com.test.palmapi.login.ProfileImage
 import com.test.palmapi.ui.theme.CardColor
-import com.test.palmapi.ui.theme.appBackground
 import com.test.palmapi.ui.theme.appGradient
 import com.test.palmapi.ui.theme.monteBold
 import com.test.palmapi.ui.theme.monteNormal
 import com.test.palmapi.ui.theme.monteSB
 import com.test.palmapi.ui.theme.textColor
-import com.test.palmapi.ui.theme.ybc
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @Composable
@@ -241,35 +227,6 @@ fun NewChat(
                         viewModel = viewModel,
                         imageUrl = user?.photoUrl.toString(),
                     )
-//                    if (message.isUser) {
-//                        MyCard(
-//                            text = message.message ?: "",
-//                            imageUrl = user?.photoUrl.toString(),
-//                            interactionSource = interactionSource,
-//                            isContextMenuVisible = isContextMenuVisible,
-//                            onLongPress = { offset ->
-//                                isContextMenuVisible = true
-//                                pressOffset = DpOffset(offset.x.dp, offset.y.dp)
-//                            },
-//                            onPress = { pressScope, offset ->
-//                                coroutineScope.launch {
-//                                    val press = PressInteraction.Press(offset)
-//                                    interactionSource.emit(press)
-//                                    pressScope.tryAwaitRelease()
-//                                    interactionSource.emit(PressInteraction.Release(press))
-//                                }
-//                            },
-//                            onSizeChanged = {
-//                                itemHeight = with(density) { it.height.toDp() }
-//                            }
-//                        )
-//                    } else {
-//                        AiCARD(
-//                            text = message.message ?: "",
-//                            viewModel = viewModel
-//                        )
-//
-//                    }
                 }
 
             }
@@ -429,199 +386,6 @@ fun ChatCard(
     }
 }
 
-@Composable
-fun AiCARD(
-    text: String,
-    viewModel: MainViewModel
-) {
-    var isContextMenuVisible by rememberSaveable {
-        mutableStateOf(false)
-    }
-    var pressOffset by remember {
-        mutableStateOf(DpOffset.Zero)
-    }
-    var itemHeight by remember {
-        mutableStateOf(0.dp)
-    }
-    val interactionSource = remember {
-        MutableInteractionSource()
-    }
-    val density = LocalDensity.current
-    Row(
-        verticalAlignment = Alignment.Top,
-        modifier = Modifier
-            .padding(
-                start = 10.dp,
-                end = 20.dp,
-                top = 7.dp,
-                bottom = 7.dp
-            )
-            .clickable {
-                isContextMenuVisible = false
-                viewModel.isBlurred.value = false
-            }
-            .onSizeChanged {
-                itemHeight = with(density) { it.height.toDp() }
-            }
-            .indication(interactionSource, LocalIndication.current)
-            .pointerInput(true) {
-                detectTapGestures(
-                    onLongPress = {
-                        isContextMenuVisible = true
-                        viewModel.isBlurred.value = true
-                        pressOffset = DpOffset(it.x.toDp(), it.y.toDp())
-                    },
-                    onPress = {
-                        isContextMenuVisible = false
-                        viewModel.isBlurred.value = false
-                        val press = PressInteraction.Press(it)
-                        interactionSource.emit(press)
-                        tryAwaitRelease()
-                        interactionSource.emit(PressInteraction.Release(press))
-                    }
-                )
-            }
-            .then(
-                if (viewModel.isBlurred.value && !isContextMenuVisible)
-                    Modifier.blur(10.dp) else Modifier
-            )
-    ) {
-        ProfileImage(
-            imageUrl = R.drawable.appicon,
-            modifier = Modifier
-                .size(30.dp)
-                .border(
-                    width = 1.dp,
-                    color = textColor.copy(0.5f),
-                    shape = CircleShape
-                )
-                .padding(3.dp)
-                .clip(CircleShape),
-        )
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    start = 7.dp,
-                    end = 7.dp,
-                    top = 0.dp,
-                    bottom = 7.dp
-                ),
-            colors = CardDefaults.cardColors(
-                containerColor = Color.Transparent
-            )
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(7.dp),
-                horizontalArrangement = Arrangement.Start,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = text,
-                    color = textColor,
-                    fontFamily = monteBold,
-                    fontSize = 15.sp
-                )
-            }
-        }
-    }
-    if (isContextMenuVisible) {
-        Box {
-            ContextMenu(isContextMenuVisible = isContextMenuVisible,
-                offset = pressOffset.copy(
-                    y = pressOffset.y - itemHeight
-                ),
-                onDismissRequest = {
-                    isContextMenuVisible = false
-                    viewModel.isBlurred.value = false
-                })
-        }
-    }
-}
-
-@Composable
-fun MyCard(
-    text: String,
-    imageUrl: String,
-    interactionSource: InteractionSource,
-    isContextMenuVisible: Boolean,
-    onLongPress: (Offset) -> Unit = {},
-    onPress: (PressGestureScope, Offset) -> Unit = { _, _ -> },
-    onSizeChanged: (IntSize) -> Unit = {}
-) {
-    Row(
-        horizontalArrangement = Arrangement.End,
-        verticalAlignment = Alignment.Top,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(
-                start = 10.dp,
-                end = 20.dp,
-                top = 7.dp,
-                bottom = 7.dp
-            )
-            .onSizeChanged {
-                onSizeChanged(it)
-            }
-            .indication(interactionSource, LocalIndication.current)
-            .pointerInput(true) {
-                detectTapGestures(
-                    onLongPress = {
-                        onLongPress(it)
-                    },
-                    onPress = {
-                        onPress(this, it)
-                    }
-                )
-            }
-    ) {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth(0.86f)
-                .padding(
-                    start = 7.dp,
-                    end = 7.dp,
-                    top = 0.dp,
-                    bottom = 7.dp
-                ),
-            colors = CardDefaults.cardColors(
-                containerColor = Color.Transparent
-            )
-        ) {
-            Row(
-                modifier = Modifier
-                    .padding(5.dp),
-                horizontalArrangement = Arrangement.Start,
-                verticalAlignment = Alignment.Top
-            ) {
-                Text(
-                    text = text,
-                    color = textColor,
-                    fontFamily = monteBold,
-                    fontSize = 15.sp,
-                    softWrap = true
-                )
-            }
-        }
-        ProfileImage(
-            imageUrl = imageUrl,
-            modifier = Modifier
-                .size(35.dp)
-                .border(
-                    width = 1.dp,
-                    color = textColor.copy(0.5f),
-                    shape = CircleShape
-                )
-                .padding(3.dp)
-                .clip(CircleShape),
-        )
-    }
-//    if (isContextMenuVisible){
-//        ContextMenu()
-//    }
-}
 
 @Composable
 fun ContextMenu(
