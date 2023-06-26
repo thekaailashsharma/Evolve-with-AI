@@ -6,9 +6,9 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.test.palmapi.database.ChatMessage
 import com.test.palmapi.database.DatabaseObject
 import com.test.palmapi.database.DatabaseRepo
+import com.test.palmapi.database.chats.ChatMessage
 import com.test.palmapi.dto.ApiPrompt
 import com.test.palmapi.dto.PalmApi
 import com.test.palmapi.dto.Prompt
@@ -29,8 +29,10 @@ class MainViewModel @Inject constructor(
     val listOfMessages: MutableState<MutableList<ChatMessage>> = mutableStateOf(mutableListOf())
     val message: MutableState<String> = mutableStateOf("")
     val allMessages: Flow<List<ChatMessage>>
-    var isLoading: MutableState<Boolean> = mutableStateOf(false)
+    val savedMessages: Flow<List<ChatMessage>>
     var isBlurred: MutableState<Boolean> = mutableStateOf(false)
+    var savedName: MutableState<String> = mutableStateOf("")
+
 
     private val dbRepository: DatabaseRepo
 
@@ -39,11 +41,12 @@ class MainViewModel @Inject constructor(
         val dataDao = dB.hisDao()
         dbRepository = DatabaseRepo(dataDao)
         allMessages = dbRepository.allMessages
+        savedMessages = dbRepository.getSavedMessage(savedName.value)
     }
 
     fun getApiData() {
-        isLoading = mutableStateOf(true)
         viewModelScope.launch {
+            delay(1000)
             apiData = mutableStateOf(
                 repository.getApiData(
                     ApiPrompt(
@@ -53,23 +56,27 @@ class MainViewModel @Inject constructor(
                     )
                 )
             )
-            saveChat(
+            insertChat(
                 ChatMessage(
                     time = System.currentTimeMillis(),
                     message = apiData.value?.candidates?.get(0)?.output ?: "Something went wrong.",
-                    isUser = false
+                    isUser = false,
                 )
             )
-
             Log.i("Messages API Called", listOfMessages.value.toString())
-            delay(2000)
-            isLoading = mutableStateOf(false)
         }
     }
 
-    fun saveChat(chatMessage: ChatMessage) {
+
+    fun insertChat(chatMessage: ChatMessage) {
         viewModelScope.launch {
             dbRepository.insertMessage(chatMessage)
+        }
+    }
+
+    fun saveChatMessage(name: String, isPined: Boolean) {
+        viewModelScope.launch {
+            dbRepository.saveChatMessage(name, isPined)
         }
     }
 

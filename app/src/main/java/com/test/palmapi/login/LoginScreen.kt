@@ -1,7 +1,6 @@
 package com.test.palmapi.login
 
 import android.app.Activity
-import android.app.Instrumentation
 import android.content.Context
 import android.content.Intent
 import android.util.Log
@@ -55,8 +54,6 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.tasks.OnFailureListener
-import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
@@ -65,13 +62,12 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.test.palmapi.MainActivity
 import com.test.palmapi.R
+import com.test.palmapi.datastore.UserDatastore
 import com.test.palmapi.navigation.Screens
 import com.test.palmapi.ui.theme.CardColor
-import com.test.palmapi.ui.theme.appBackground
 import com.test.palmapi.ui.theme.appGradient
 import com.test.palmapi.ui.theme.monteBold
 import com.test.palmapi.ui.theme.monteNormal
-import com.test.palmapi.ui.theme.monteSB
 import com.test.palmapi.ui.theme.textColor
 import com.test.palmapi.ui.theme.ybc
 import kotlinx.coroutines.launch
@@ -81,6 +77,8 @@ import kotlinx.coroutines.tasks.await
 fun LoginScreen(navHostController: NavHostController) {
     val firebaseAuth = FirebaseAuth.getInstance()
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    val dataStore = UserDatastore(context)
     val githubLogin = {
         val provider = OAuthProvider.newBuilder("github.com")
         commonLoginCode(provider, firebaseAuth, context)
@@ -93,6 +91,11 @@ fun LoginScreen(navHostController: NavHostController) {
     var user by remember { mutableStateOf(Firebase.auth.currentUser) }
     LaunchedEffect(key1 = user) {
         if (user != null) {
+            coroutineScope.launch {
+                dataStore.saveEmail(user?.email.toString())
+                dataStore.saveName(user?.displayName.toString())
+                dataStore.savePfp(user?.photoUrl.toString())
+            }
             navHostController.popBackStack()
             navHostController.navigate(Screens.NewChat.route)
         }
@@ -109,12 +112,12 @@ fun LoginScreen(navHostController: NavHostController) {
         val gso =
             GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(token)
-                .requestEmail().requestProfile()
+                .requestEmail()
+                .requestProfile()
                 .build()
         val googleSignInClient = GoogleSignIn.getClient(context, gso)
         googleSignInClient.signOut()
         launcher.launch(googleSignInClient.signInIntent)
-
     }
 
 

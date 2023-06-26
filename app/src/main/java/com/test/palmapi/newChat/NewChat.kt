@@ -34,12 +34,17 @@ import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.IosShare
+import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SheetState
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -75,11 +80,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
 import com.test.palmapi.MainViewModel
 import com.test.palmapi.R
-import com.test.palmapi.database.ChatMessage
+import com.test.palmapi.database.chats.ChatMessage
 import com.test.palmapi.login.ProfileImage
 import com.test.palmapi.ui.theme.CardColor
 import com.test.palmapi.ui.theme.appGradient
@@ -87,15 +90,19 @@ import com.test.palmapi.ui.theme.monteBold
 import com.test.palmapi.ui.theme.monteNormal
 import com.test.palmapi.ui.theme.monteSB
 import com.test.palmapi.ui.theme.textColor
+import com.test.palmapi.utils.BottomSheetContent
+import com.test.palmapi.utils.NewChatBottomBar
+import com.test.palmapi.utils.NewChatTopBar
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewChat(
     navHostController: NavHostController,
-    viewModel: MainViewModel = hiltViewModel()
+    viewModel: MainViewModel = hiltViewModel(),
+    photoUrl: String,
 ) {
-    val user by remember { mutableStateOf(Firebase.auth.currentUser) }
     var text by remember {
         mutableStateOf(TextFieldValue(""))
     }
@@ -111,140 +118,164 @@ fun NewChat(
             Log.i("Message", e.toString())
         }
     }
-    Log.i("ProfileImage", user?.photoUrl.toString())
-    Scaffold(
-        topBar = { NewChatTopBar() },
-        bottomBar = {
-            NewChatBottomBar(
-                viewModel = viewModel,
-                text = text,
-                onTextChange = {
-                    text = it
-                },
-                onClick = {
-                    viewModel.saveChat(
-                        ChatMessage(
-                            message = text.text,
-                            time = System.currentTimeMillis(),
-                            isUser = true
-                        )
-                    )
-                    viewModel.message.value = text.text
-                    viewModel.getApiData()
-                    coroutineScope.launch {
-                        try {
-                            if (result.isNotEmpty()) {
-                                lazyListState.animateScrollToItem(result.size - 1)
-                            }
-                        } catch (e: Exception) {
-                            Log.i("Message", e.toString())
+    Log.i("ProfileImage", photoUrl)
+    val modalSheetState = rememberBottomSheetScaffoldState(
+        bottomSheetState = SheetState(
+            initialValue = SheetValue.Hidden,
+            skipPartiallyExpanded = false
+        )
+    )
+
+    BottomSheetScaffold(
+        sheetContent = {
+            BottomSheetContent(viewModel)
+        },
+        sheetContainerColor = CardColor.copy(0.95f),
+        scaffoldState = modalSheetState,
+        sheetShape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
+        sheetPeekHeight = 0.dp,
+    ) {
+        Scaffold(
+            topBar = {
+                NewChatTopBar(
+                    navHostController = navHostController,
+                    onSave = {
+                        coroutineScope.launch {
+                            modalSheetState.bottomSheetState.expand()
                         }
                     }
-                    text = TextFieldValue("")
-
-                }
-            )
-        }
-    ) {
-
-        Log.i("Message8", result.toString())
-
-        println(it)
-        if (result.isEmpty()) {
-            Column(
-                modifier = Modifier
-                    .background(appGradient)
-                    .fillMaxSize()
-                    .padding(top = 150.dp),
-                verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(text = buildAnnotatedString {
-                    withStyle(
-                        style = SpanStyle(
-                            fontFamily = monteNormal,
-                            color = textColor,
-                            fontSize = 30.sp,
-                            fontWeight = FontWeight.Black
+                )
+            },
+            bottomBar = {
+                NewChatBottomBar(
+                    viewModel = viewModel,
+                    text = text,
+                    onTextChange = {
+                        text = it
+                    },
+                    onClick = {
+                        viewModel.insertChat(
+                            ChatMessage(
+                                message = text.text,
+                                time = System.currentTimeMillis(),
+                                isUser = true
+                            )
                         )
-                    ) {
-                        append("Hello, Ask Me")
-                    }
-                    append("\n")
-                    withStyle(
-                        SpanStyle(
-                            fontFamily = monteNormal,
-                            color = textColor,
-                            fontSize = 19.sp,
-                            fontWeight = FontWeight.Normal
-                        )
-                    ) {
-                        append("Anything ...")
-                    }
-                })
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = "I'm your assistant.",
-                    color = textColor,
-                    fontFamily = monteSB
-                )
-                Spacer(modifier = Modifier.height(15.dp))
-                RepeatedCard(
-                    icon = R.drawable.beta,
-                    description = "I'm still under development"
-                )
-                Spacer(modifier = Modifier.height(10.dp))
-                RepeatedCard(
-                    icon = R.drawable.remember,
-                    description = "I can remember our conversations"
-                )
-                Spacer(modifier = Modifier.height(10.dp))
-                RepeatedCard(
-                    icon = R.drawable.privacy,
-                    description = "Your Privacy is completely secured"
-                )
-                Spacer(modifier = Modifier.height(10.dp))
-                RepeatedCard(
-                    icon = R.drawable.tip,
-                    description = "Long Press on Chat to see options"
-                )
-                Spacer(modifier = Modifier.height(10.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.MoreHoriz,
-                        contentDescription = "more",
-                        tint = textColor.copy(0.45f),
-                        modifier = Modifier.size(40.dp)
-                    )
+                        viewModel.message.value = text.text
+                        viewModel.getApiData()
+                        coroutineScope.launch {
+                            try {
+                                if (result.isNotEmpty()) {
+                                    lazyListState.animateScrollToItem(result.size - 1)
+                                }
+                            } catch (e: Exception) {
+                                Log.i("Message", e.toString())
+                            }
+                        }
+                        text = TextFieldValue("")
 
-                }
+                    }
+                )
             }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .background(appGradient)
-                    .fillMaxSize()
-                    .padding(top = 30.dp),
-                contentPadding = PaddingValues(top = 40.dp, bottom = 130.dp),
-                state = lazyListState,
-            ) {
-                items(result) { message ->
-                    ChatCard(
-                        text = message.message ?: "",
-                        isUser = message.isUser,
-                        viewModel = viewModel,
-                        imageUrl = user?.photoUrl.toString(),
-                        time = message.time
+        ) {
+            println(it)
+            if (result.isEmpty()) {
+                Column(
+                    modifier = Modifier
+                        .background(appGradient)
+                        .fillMaxSize()
+                        .padding(top = 150.dp),
+                    verticalArrangement = Arrangement.Top,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(text = buildAnnotatedString {
+                        withStyle(
+                            style = SpanStyle(
+                                fontFamily = monteNormal,
+                                color = textColor,
+                                fontSize = 30.sp,
+                                fontWeight = FontWeight.Black
+                            )
+                        ) {
+                            append("Hello, Ask Me")
+                        }
+                        append("\n")
+                        withStyle(
+                            SpanStyle(
+                                fontFamily = monteNormal,
+                                color = textColor,
+                                fontSize = 19.sp,
+                                fontWeight = FontWeight.Normal
+                            )
+                        ) {
+                            append("Anything ...")
+                        }
+                    })
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "I'm your assistant.",
+                        color = textColor,
+                        fontFamily = monteSB
                     )
-                }
+                    Spacer(modifier = Modifier.height(15.dp))
+                    RepeatedCard(
+                        icon = R.drawable.beta,
+                        description = "I'm still under development"
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                    RepeatedCard(
+                        icon = R.drawable.remember,
+                        description = "I can remember our conversations"
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                    RepeatedCard(
+                        icon = R.drawable.privacy,
+                        description = "Your Privacy is completely secured"
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                    RepeatedCard(
+                        icon = R.drawable.tip,
+                        description = "Long Press on Chat to see options"
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.MoreHoriz,
+                            contentDescription = "more",
+                            tint = textColor.copy(0.45f),
+                            modifier = Modifier.size(40.dp)
+                        )
 
+                    }
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .background(appGradient)
+                        .fillMaxSize()
+                        .padding(top = 30.dp),
+                    contentPadding = PaddingValues(top = 40.dp, bottom = 130.dp),
+                    state = lazyListState,
+                ) {
+                    items(result) { message ->
+                        ChatCard(
+                            text = message.message ?: "",
+                            isUser = message.isUser,
+                            viewModel = viewModel,
+                            imageUrl = photoUrl,
+                            time = message.time,
+                        )
+                    }
+
+                }
             }
         }
     }
 }
+
 
 @Composable
 fun ChatCard(
@@ -313,6 +344,7 @@ fun ChatCard(
                         isContextMenuVisible = true
                         viewModel.isBlurred.value = true
                         pressOffset = DpOffset(it.x.toDp(), it.y.toDp())
+
                     },
                     onPress = {
                         isContextMenuVisible = false
@@ -326,7 +358,9 @@ fun ChatCard(
             }
             .then(
                 if (viewModel.isBlurred.value && !isContextMenuVisible)
-                    Modifier.blur(10.dp, 10.dp, BlurredEdgeTreatment.Unbounded) else Modifier
+                    Modifier
+                        .blur(10.dp, 10.dp, BlurredEdgeTreatment.Unbounded)
+                else Modifier
             )
             .then(if (deleted) Modifier.graphicsLayer {
                 translationX = translation
@@ -386,6 +420,7 @@ fun ChatCard(
                     fontSize = 15.sp,
                     softWrap = true
                 )
+
             }
         }
         if (isUser) {

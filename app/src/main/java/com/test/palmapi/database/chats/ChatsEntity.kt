@@ -1,4 +1,4 @@
-package com.test.palmapi.database
+package com.test.palmapi.database.chats
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
@@ -10,6 +10,10 @@ data class ChatMessage(
     val time: Long,
     @ColumnInfo(name = "message")
     val message: String?,
-    @ColumnInfo(name = "is_user")
-    val isUser: Boolean
+    @ColumnInfo(name = "isUser")
+    val isUser: Boolean,
+    @ColumnInfo(name = "Name")
+    val name: String = "New Chat",
+    @ColumnInfo(name = "isPined")
+    val isPined: Boolean = false,
 )

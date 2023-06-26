@@ -113,6 +113,8 @@ dependencies {
     //Lottie Animation
     implementation(libs.lottie)
 
+    //DataStore
+    implementation(libs.datastore.core)
 
     //Test Android
     testImplementation(libs.junit)

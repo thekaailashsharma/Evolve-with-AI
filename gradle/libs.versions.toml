@@ -17,6 +17,7 @@ firebase-auth-ktx = "22.0.0"
 firebase-bom = "32.1.1"
 play-services-auth = "20.5.0"
 room-version = "2.5.0"
+datastorePreferencesCore = "1.0.0"
 
 [libraries]
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
@@ -53,6 +54,7 @@ ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 material3 = { group = "androidx.compose.material3", name = "material3" }
 firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx", version.ref = "firebase-auth-ktx" }
 play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "play-services-auth" }
+datastore-core = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastorePreferencesCore" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

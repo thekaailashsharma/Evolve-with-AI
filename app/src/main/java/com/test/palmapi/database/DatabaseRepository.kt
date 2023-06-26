@@ -1,6 +1,8 @@
 package com.test.palmapi.database
 
 
+import com.test.palmapi.database.chats.ChatDao
+import com.test.palmapi.database.chats.ChatMessage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -14,6 +16,15 @@ class DatabaseRepo(private val chatDao: ChatDao) {
             chatDao.insertChatMessage(chatMessage)
         }
     }
+
+    fun saveChatMessage(name: String, isPined: Boolean) {
+        coroutineScope.launch {
+            chatDao.saveChatMessage(name, isPined)
+        }
+    }
+
+
+    fun getSavedMessage(name: String) = chatDao.getSavedMessages(name)
 
     fun deleteMessage(time: Long) {
         coroutineScope.launch {
