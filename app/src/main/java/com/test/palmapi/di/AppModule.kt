@@ -1,10 +1,14 @@
 package com.test.palmapi.di
 
+import android.content.Context
+import com.test.palmapi.database.DatabaseObject
+import com.test.palmapi.database.DatabaseRepo
 import com.test.palmapi.repository.ApiService
 import com.test.palmapi.repository.ApiServiceImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
@@ -41,5 +45,12 @@ object AppModule {
     @Singleton
     fun provideApiService(client: HttpClient): ApiService {
         return ApiServiceImpl(client = client)
+    }
+
+    @Provides
+    @Singleton
+    fun provideDatabaseRepo(@ApplicationContext context: Context): DatabaseRepo {
+        val dB = DatabaseObject.getInstance(context)
+        return DatabaseRepo(dB.chatDao(), dB.accountsDao())
     }
 }

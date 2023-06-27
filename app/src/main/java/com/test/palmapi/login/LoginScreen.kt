@@ -1,13 +1,13 @@
 package com.test.palmapi.login
 
 import android.app.Activity
+import android.app.Activity.RESULT_OK
 import android.content.Context
 import android.content.Intent
 import android.util.Log
 import android.widget.Toast
-import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.ActivityResult
+import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -29,6 +29,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,7 +41,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -51,16 +51,11 @@ import androidx.navigation.NavHostController
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.rememberLottieComposition
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.ApiException
-import com.google.firebase.auth.AuthResult
+import com.google.android.gms.auth.api.identity.Identity
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.OAuthProvider
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
 import com.test.palmapi.MainActivity
+import com.test.palmapi.MainViewModel
 import com.test.palmapi.R
 import com.test.palmapi.datastore.UserDatastore
 import com.test.palmapi.navigation.Screens
@@ -71,12 +66,13 @@ import com.test.palmapi.ui.theme.monteNormal
 import com.test.palmapi.ui.theme.textColor
 import com.test.palmapi.ui.theme.ybc
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 
 @Composable
-fun LoginScreen(navHostController: NavHostController) {
+fun LoginScreen(navHostController: NavHostController, viewModel: MainViewModel) {
+
     val firebaseAuth = FirebaseAuth.getInstance()
     val context = LocalContext.current
+    val state by viewModel.state.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     val dataStore = UserDatastore(context)
     val githubLogin = {
@@ -87,38 +83,64 @@ fun LoginScreen(navHostController: NavHostController) {
         val provider = OAuthProvider.newBuilder("twitter.com")
         commonLoginCode(provider, firebaseAuth, context)
     }
-    val token = stringResource(R.string.default_web_client_id)
-    var user by remember { mutableStateOf(Firebase.auth.currentUser) }
-    LaunchedEffect(key1 = user) {
-        if (user != null) {
+    val googleAuthUiClient by lazy {
+        GoogleAuthUiClient(
+            context = context,
+            oneTapClient = Identity.getSignInClient(context)
+        )
+    }
+    var userName by remember { mutableStateOf("") }
+    var userPfp by remember { mutableStateOf("") }
+    var userEmail by remember { mutableStateOf("") }
+    LaunchedEffect(key1 = state.isSignInSuccessful) {
+        if (state.isSignInSuccessful) {
+            Toast.makeText(
+                context,
+                "Sign in successful + ${googleAuthUiClient.getSignedInUser()?.email}",
+                Toast.LENGTH_LONG
+            ).show()
             coroutineScope.launch {
-                dataStore.saveEmail(user?.email.toString())
-                dataStore.saveName(user?.displayName.toString())
-                dataStore.savePfp(user?.photoUrl.toString())
+                dataStore.saveEmail(googleAuthUiClient.getSignedInUser()?.email ?: "")
+                dataStore.saveName(googleAuthUiClient.getSignedInUser()?.username ?: "")
+                dataStore.savePfp(googleAuthUiClient.getSignedInUser()?.profilePictureUrl ?: "")
+            }
+            navHostController.popBackStack()
+            navHostController.navigate(Screens.NewChat.route)
+            viewModel.resetState()
+        }
+    }
+    LaunchedEffect(key1 = Unit) {
+        Log.i("Auth-Client", googleAuthUiClient.getSignedInUser().toString())
+        if (googleAuthUiClient.getSignedInUser()?.username != null) {
+            Log.i("Auth-Client2.0", googleAuthUiClient.getSignedInUser()?.email ?: "")
+            Log.i("Auth-Client2.0", googleAuthUiClient.getSignedInUser()?.username ?: "")
+            Log.i("Auth-Client2.0", googleAuthUiClient.getSignedInUser()?.profilePictureUrl ?: "")
+            coroutineScope.launch {
+                dataStore.saveEmail(googleAuthUiClient.getSignedInUser()?.email ?: "")
+                dataStore.saveName(googleAuthUiClient.getSignedInUser()?.username ?: "")
+                dataStore.savePfp(googleAuthUiClient.getSignedInUser()?.profilePictureUrl ?: "")
             }
             navHostController.popBackStack()
             navHostController.navigate(Screens.NewChat.route)
         }
     }
-    val launcher = rememberFirebaseAuthLauncher(
-        onAuthComplete = { result ->
-            user = result.user
-        },
-        onAuthError = {
-            user = null
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartIntentSenderForResult(),
+        onResult = { result ->
+            if (result.resultCode == RESULT_OK) {
+                coroutineScope.launch {
+                    val signInResult = googleAuthUiClient.signInWithIntent(
+                        intent = result.data ?: return@launch
+                    )
+                    viewModel.onSignInResult(signInResult)
+                    userName = googleAuthUiClient.getSignedInUser()?.username ?: ""
+                    userEmail = googleAuthUiClient.getSignedInUser()?.email ?: ""
+                    userPfp = googleAuthUiClient.getSignedInUser()?.profilePictureUrl ?: ""
+                }
+            }
         }
     )
-    val googleLogin = {
-        val gso =
-            GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(token)
-                .requestEmail()
-                .requestProfile()
-                .build()
-        val googleSignInClient = GoogleSignIn.getClient(context, gso)
-        googleSignInClient.signOut()
-        launcher.launch(googleSignInClient.signInIntent)
-    }
+
 
 
     Column(
@@ -191,7 +213,14 @@ fun LoginScreen(navHostController: NavHostController) {
             icon = R.drawable.google,
             description = "Google",
             onClick = {
-                googleLogin()
+                coroutineScope.launch {
+                    val signInIntentSender = googleAuthUiClient.signIn()
+                    launcher.launch(
+                        IntentSenderRequest.Builder(
+                            signInIntentSender ?: return@launch
+                        ).build()
+                    )
+                }
             }
         )
 
@@ -332,26 +361,5 @@ fun RepeatedLoginButton(
 
         }
 
-    }
-}
-
-@Composable
-fun rememberFirebaseAuthLauncher(
-    onAuthComplete: (AuthResult) -> Unit,
-    onAuthError: (ApiException) -> Unit
-): ManagedActivityResultLauncher<Intent, ActivityResult> {
-    val scope = rememberCoroutineScope()
-    return rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-        try {
-            val account = task.getResult(ApiException::class.java)!!
-            val credential = GoogleAuthProvider.getCredential(account.idToken!!, null)
-            scope.launch {
-                val authResult = Firebase.auth.signInWithCredential(credential).await()
-                onAuthComplete(authResult)
-            }
-        } catch (e: ApiException) {
-            onAuthError(e)
-        }
     }
 }

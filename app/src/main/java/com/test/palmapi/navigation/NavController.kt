@@ -1,13 +1,20 @@
 package com.test.palmapi.navigation
 
+import android.util.Log
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import com.test.palmapi.MainViewModel
 import com.test.palmapi.datastore.UserDatastore
 import com.test.palmapi.home.HomeScreen
@@ -19,15 +26,24 @@ import com.test.palmapi.savedChat.SavedChat
 @Composable
 fun NavController() {
     val navController = rememberAnimatedNavController()
+    var user by remember { mutableStateOf(Firebase.auth.currentUser) }
+    user?.let {
+        for (profile in it.providerData) {
+            val providerId = profile.providerId
+            Log.i("Email-Profile2", profile.email.toString())
+
+        }
+    }
     val viewModel: MainViewModel = hiltViewModel()
     val context = LocalContext.current
     val dataStore = UserDatastore(context)
     val name = dataStore.getName.collectAsState(initial = "")
     val email = dataStore.getEmail.collectAsState(initial = "")
+    Log.i("Name", name.value)
     val pfp = dataStore.getPfp.collectAsState(initial = "")
     AnimatedNavHost(navController = navController, startDestination = Screens.Login.route) {
         composable(Screens.Login.route) {
-            LoginScreen(navHostController = navController)
+            LoginScreen(navHostController = navController, viewModel = viewModel)
         }
         composable(Screens.NewChat.route) {
             NewChat(navHostController = navController, photoUrl = pfp.value, viewModel = viewModel)

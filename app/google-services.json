@@ -14,7 +14,15 @@
       },
       "oauth_client": [
         {
-          "client_id": "887271237443-mm1p29bkn5t8t7j4rk43b2em6vckhg9h.apps.googleusercontent.com",
+          "client_id": "887271237443-t5u355cc8k4srufl3kga4isgrig7ov7n.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.test.palmapi",
+            "certificate_hash": "8f3590507f5157868b7649b97362c127d84790fa"
+          }
+        },
+        {
+          "client_id": "887271237443-9l1lmg9rph04luiptieg7b31l800ujbo.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
@@ -27,7 +35,7 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "887271237443-mm1p29bkn5t8t7j4rk43b2em6vckhg9h.apps.googleusercontent.com",
+              "client_id": "887271237443-9l1lmg9rph04luiptieg7b31l800ujbo.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

@@ -16,4 +16,6 @@ data class ChatMessage(
     val name: String = "New Chat",
     @ColumnInfo(name = "isPined")
     val isPined: Boolean = false,
+    @ColumnInfo(name = "id")
+    val id: Int = 0
 )

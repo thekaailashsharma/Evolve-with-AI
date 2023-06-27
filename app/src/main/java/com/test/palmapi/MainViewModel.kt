@@ -6,23 +6,28 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.test.palmapi.database.DatabaseObject
 import com.test.palmapi.database.DatabaseRepo
 import com.test.palmapi.database.chats.ChatMessage
 import com.test.palmapi.dto.ApiPrompt
 import com.test.palmapi.dto.PalmApi
 import com.test.palmapi.dto.Prompt
+import com.test.palmapi.login.SignInResult
+import com.test.palmapi.login.SignInState
 import com.test.palmapi.repository.ApiService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
     application: Application,
-    private val repository: ApiService
+    private val repository: ApiService,
+    private val dbRepository: DatabaseRepo
 ) : AndroidViewModel(application) {
 
     var apiData: MutableState<PalmApi?> = mutableStateOf(null)
@@ -33,13 +38,24 @@ class MainViewModel @Inject constructor(
     var isBlurred: MutableState<Boolean> = mutableStateOf(false)
     var savedName: MutableState<String> = mutableStateOf("")
 
+    private val _state = MutableStateFlow(SignInState())
+    val state = _state.asStateFlow()
 
-    private val dbRepository: DatabaseRepo
+    fun onSignInResult(result: SignInResult) {
+        _state.update {
+            it.copy(
+                isSignInSuccessful = result.data != null,
+                signInError = result.errorMessage
+            )
+        }
+    }
+
+    fun resetState() {
+        _state.update { SignInState() }
+    }
+
 
     init {
-        val dB = DatabaseObject.getInstance(application)
-        val dataDao = dB.hisDao()
-        dbRepository = DatabaseRepo(dataDao)
         allMessages = dbRepository.allMessages
         savedMessages = dbRepository.getSavedMessage(savedName.value)
     }
