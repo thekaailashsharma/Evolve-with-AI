@@ -20,6 +20,18 @@ class DatabaseRepo(private val chatDao: ChatDao, private val accountsDao: Accoun
         }
     }
 
+    fun updateCurrentAccount(isCurrent: Boolean, uniqueId: String) {
+        coroutineScope.launch {
+            accountsDao.updateCurrentAccount(isCurrent, uniqueId)
+        }
+    }
+
+    fun removeCurrentAccount() {
+        coroutineScope.launch {
+            accountsDao.removeCurrentAccount()
+        }
+    }
+
     fun insertAccount(account: Accounts) {
         coroutineScope.launch {
             accountsDao.insertAccount(account)

@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Evolve</string>
+    <string name="accountType">com.test.palmapi.account</string>
+    <string name="authTokenType">palmapi-authToken</string>
 </resources>

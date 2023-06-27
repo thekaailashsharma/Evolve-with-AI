@@ -82,6 +82,13 @@ class GoogleAuthUiClient(
                     }
                 }
                 email
+            },
+            uniqueId = auth.currentUser?.let {
+                var uniqueId: String? = null
+                for (profile in it.providerData) {
+                    uniqueId = profile.uid
+                }
+                uniqueId
             }
         )
     }
@@ -109,7 +116,8 @@ data class UserData(
     val userId: String,
     val username: String?,
     val profilePictureUrl: String?,
-    val email: String?
+    val email: String?,
+    val uniqueId: String? = null
 )
 
 data class SignInState(

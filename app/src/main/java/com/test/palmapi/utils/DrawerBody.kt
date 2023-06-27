@@ -38,6 +38,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -50,6 +51,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import com.test.palmapi.MainViewModel
 import com.test.palmapi.R
 import com.test.palmapi.login.ProfileImage
 import com.test.palmapi.ui.theme.CardColor
@@ -59,6 +62,7 @@ import com.test.palmapi.ui.theme.isDarkThemEnabled
 import com.test.palmapi.ui.theme.monteSB
 import com.test.palmapi.ui.theme.openDeviceThemeSettings
 import com.test.palmapi.ui.theme.textColor
+import kotlinx.coroutines.launch
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -68,6 +72,8 @@ fun NavigationDrawer(
     photoUrl: String,
     displayName: String,
     email: String,
+    viewModel: MainViewModel,
+    navController: NavHostController
 ) {
     val context = LocalContext.current
     val modalSheetState = rememberBottomSheetScaffoldState(
@@ -76,10 +82,11 @@ fun NavigationDrawer(
             skipPartiallyExpanded = false
         )
     )
+    val coroutineScope = rememberCoroutineScope()
 
     BottomSheetScaffold(
         sheetContent = {
-
+            AccountsBottomSheet(viewModel = viewModel, navController = navController)
         },
         sheetContainerColor = CardColor.copy(0.95f),
         scaffoldState = modalSheetState,
@@ -110,7 +117,14 @@ fun NavigationDrawer(
                             .clip(CircleShape),
                     )
                     Spacer(modifier = Modifier.height(10.dp))
-                    Row(verticalAlignment = Alignment.Bottom) {
+                    Row(
+                        verticalAlignment = Alignment.Bottom,
+                        modifier = Modifier.clickable {
+                            coroutineScope.launch {
+                                modalSheetState.bottomSheetState.expand()
+                            }
+                        }
+                    ) {
                         Text(
                             text = displayName.replaceFirstChar {
                                 if (it.isLowerCase()) it.titlecase(

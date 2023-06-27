@@ -1,9 +1,12 @@
 package com.test.palmapi.login
 
+import android.accounts.Account
+import android.accounts.AccountManager
 import android.app.Activity
 import android.app.Activity.RESULT_OK
 import android.content.Context
 import android.content.Intent
+import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -31,10 +34,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -75,35 +75,110 @@ fun LoginScreen(navHostController: NavHostController, viewModel: MainViewModel) 
     val state by viewModel.state.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     val dataStore = UserDatastore(context)
-    val githubLogin = {
-        val provider = OAuthProvider.newBuilder("github.com")
-        commonLoginCode(provider, firebaseAuth, context)
-    }
-    val twitterLogin = {
-        val provider = OAuthProvider.newBuilder("twitter.com")
-        commonLoginCode(provider, firebaseAuth, context)
-    }
     val googleAuthUiClient by lazy {
         GoogleAuthUiClient(
             context = context,
             oneTapClient = Identity.getSignInClient(context)
         )
     }
-    var userName by remember { mutableStateOf("") }
-    var userPfp by remember { mutableStateOf("") }
-    var userEmail by remember { mutableStateOf("") }
+    val githubLogin = {
+        val provider = OAuthProvider.newBuilder("github.com")
+        commonLoginCode(provider, firebaseAuth, context, onLogin = {
+            coroutineScope.launch {
+                dataStore.saveEmail(googleAuthUiClient.getSignedInUser()?.email ?: "")
+                dataStore.saveName(googleAuthUiClient.getSignedInUser()?.username ?: "")
+                dataStore.savePfp(googleAuthUiClient.getSignedInUser()?.profilePictureUrl ?: "")
+                dataStore.saveUID(googleAuthUiClient.getSignedInUser()?.uniqueId ?: "")
+            }
+            addAccountToManager(
+                context,
+                googleAuthUiClient.getSignedInUser()?.email ?: "",
+                googleAuthUiClient.getSignedInUser()?.username ?: "",
+                googleAuthUiClient.getSignedInUser()?.profilePictureUrl ?: "",
+                googleAuthUiClient.getSignedInUser()?.uniqueId ?: "",
+                "github"
+            )
+            viewModel.addAccount(
+                email = googleAuthUiClient.getSignedInUser()?.email ?: "",
+                firstName = googleAuthUiClient.getSignedInUser()?.username?.substringBefore(" ")
+                    ?: "",
+                lastName = googleAuthUiClient.getSignedInUser()?.username?.substringAfter(" ")
+                    ?: "",
+                photoUrl = googleAuthUiClient.getSignedInUser()?.profilePictureUrl ?: "",
+                uniqueId = googleAuthUiClient.getSignedInUser()?.uniqueId ?: "",
+                type = "github",
+                isCurrent = true
+            )
+            navHostController.popBackStack()
+            navHostController.navigate(Screens.NewChat.route)
+        })
+    }
+    val twitterLogin = {
+        val provider = OAuthProvider.newBuilder("twitter.com")
+        commonLoginCode(provider, firebaseAuth, context, onLogin = {
+            coroutineScope.launch {
+                dataStore.saveEmail(googleAuthUiClient.getSignedInUser()?.email ?: "")
+                dataStore.saveName(googleAuthUiClient.getSignedInUser()?.username ?: "")
+                dataStore.savePfp(googleAuthUiClient.getSignedInUser()?.profilePictureUrl ?: "")
+            }
+            addAccountToManager(
+                context,
+                googleAuthUiClient.getSignedInUser()?.email ?: "",
+                googleAuthUiClient.getSignedInUser()?.username ?: "",
+                googleAuthUiClient.getSignedInUser()?.profilePictureUrl ?: "",
+                googleAuthUiClient.getSignedInUser()?.uniqueId ?: "",
+                "twitter"
+            )
+            viewModel.addAccount(
+                email = googleAuthUiClient.getSignedInUser()?.email ?: "",
+                firstName = googleAuthUiClient.getSignedInUser()?.username?.substringBefore(" ")
+                    ?: "",
+                lastName = googleAuthUiClient.getSignedInUser()?.username?.substringAfter(" ")
+                    ?: "",
+                photoUrl = googleAuthUiClient.getSignedInUser()?.profilePictureUrl ?: "",
+                uniqueId = googleAuthUiClient.getSignedInUser()?.uniqueId ?: "",
+                type = "twitter",
+                isCurrent = true
+            )
+            navHostController.popBackStack()
+            navHostController.navigate(Screens.NewChat.route)
+        })
+    }
+
     LaunchedEffect(key1 = state.isSignInSuccessful) {
+        Log.i("TypeChanged", "isSignInSuccessful")
         if (state.isSignInSuccessful) {
+            Log.i("TypeChangedCalled", "isSignInSuccessful")
             Toast.makeText(
                 context,
-                "Sign in successful + ${googleAuthUiClient.getSignedInUser()?.email}",
+                "Sign in successful as ${googleAuthUiClient.getSignedInUser()?.email}",
                 Toast.LENGTH_LONG
             ).show()
             coroutineScope.launch {
                 dataStore.saveEmail(googleAuthUiClient.getSignedInUser()?.email ?: "")
                 dataStore.saveName(googleAuthUiClient.getSignedInUser()?.username ?: "")
                 dataStore.savePfp(googleAuthUiClient.getSignedInUser()?.profilePictureUrl ?: "")
+                addAccountToManager(
+                    context,
+                    googleAuthUiClient.getSignedInUser()?.email ?: "",
+                    googleAuthUiClient.getSignedInUser()?.username ?: "",
+                    googleAuthUiClient.getSignedInUser()?.profilePictureUrl ?: "",
+                    googleAuthUiClient.getSignedInUser()?.uniqueId ?: "",
+                    "google"
+                )
+                viewModel.addAccount(
+                    email = googleAuthUiClient.getSignedInUser()?.email ?: "",
+                    firstName = googleAuthUiClient.getSignedInUser()?.username?.substringBefore(" ")
+                        ?: "",
+                    lastName = googleAuthUiClient.getSignedInUser()?.username?.substringAfter(" ")
+                        ?: "",
+                    photoUrl = googleAuthUiClient.getSignedInUser()?.profilePictureUrl ?: "",
+                    uniqueId = googleAuthUiClient.getSignedInUser()?.uniqueId ?: "",
+                    type = "google",
+                    isCurrent = true
+                )
             }
+
             navHostController.popBackStack()
             navHostController.navigate(Screens.NewChat.route)
             viewModel.resetState()
@@ -119,7 +194,27 @@ fun LoginScreen(navHostController: NavHostController, viewModel: MainViewModel) 
                 dataStore.saveEmail(googleAuthUiClient.getSignedInUser()?.email ?: "")
                 dataStore.saveName(googleAuthUiClient.getSignedInUser()?.username ?: "")
                 dataStore.savePfp(googleAuthUiClient.getSignedInUser()?.profilePictureUrl ?: "")
+                addAccountToManager(
+                    context,
+                    googleAuthUiClient.getSignedInUser()?.email ?: "",
+                    googleAuthUiClient.getSignedInUser()?.username ?: "",
+                    googleAuthUiClient.getSignedInUser()?.profilePictureUrl ?: "",
+                    googleAuthUiClient.getSignedInUser()?.uniqueId ?: "",
+                    "google"
+                )
+                viewModel.addAccount(
+                    email = googleAuthUiClient.getSignedInUser()?.email ?: "",
+                    firstName = googleAuthUiClient.getSignedInUser()?.username?.substringBefore(" ")
+                        ?: "",
+                    lastName = googleAuthUiClient.getSignedInUser()?.username?.substringAfter(" ")
+                        ?: "",
+                    photoUrl = googleAuthUiClient.getSignedInUser()?.profilePictureUrl ?: "",
+                    uniqueId = googleAuthUiClient.getSignedInUser()?.uniqueId ?: "",
+                    type = "google",
+                    isCurrent = true
+                )
             }
+
             navHostController.popBackStack()
             navHostController.navigate(Screens.NewChat.route)
         }
@@ -133,9 +228,6 @@ fun LoginScreen(navHostController: NavHostController, viewModel: MainViewModel) 
                         intent = result.data ?: return@launch
                     )
                     viewModel.onSignInResult(signInResult)
-                    userName = googleAuthUiClient.getSignedInUser()?.username ?: ""
-                    userEmail = googleAuthUiClient.getSignedInUser()?.email ?: ""
-                    userPfp = googleAuthUiClient.getSignedInUser()?.profilePictureUrl ?: ""
                 }
             }
         }
@@ -269,7 +361,6 @@ fun LoginScreen(navHostController: NavHostController, viewModel: MainViewModel) 
         }
 
 
-
     }
 
 }
@@ -277,7 +368,8 @@ fun LoginScreen(navHostController: NavHostController, viewModel: MainViewModel) 
 fun commonLoginCode(
     provider: OAuthProvider.Builder,
     firebaseAuth: FirebaseAuth,
-    context: Context
+    context: Context,
+    onLogin: () -> Unit = {}
 ) {
     val pendingResultTask = firebaseAuth.pendingAuthResult
     // There's something already here! Finish the sign-in for your user.
@@ -298,6 +390,7 @@ fun commonLoginCode(
                 // send github user name from MainActivity to HomePageActivity
                 Log.i("Github", "Success")
                 context.startActivity(intent)
+                onLogin()
                 Toast.makeText(context, "Login Successfully", Toast.LENGTH_LONG).show()
 
             }
@@ -363,3 +456,32 @@ fun RepeatedLoginButton(
 
     }
 }
+
+
+fun addAccountToManager(
+    context: Context,
+    email: String,
+    name: String,
+    photoUrl: String,
+    uniqueId: String,
+    type: String
+) {
+
+    val accountManager = AccountManager.get(context)
+    val accountType = context.getString(R.string.accountType)
+
+    val account = Account(email, accountType)
+    val userData = Bundle().apply {
+        putString("name", name)
+        putString("photoUrl", photoUrl)
+        putString("uniqueId", uniqueId)
+        putString("type", type)
+    }
+    accountManager.addAccountExplicitly(account, name, userData)
+    accountManager.setAuthToken(
+        account,
+        context.getString(R.string.authTokenType),
+        uniqueId
+    )
+}
+

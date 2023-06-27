@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.test.palmapi.database.DatabaseRepo
+import com.test.palmapi.database.accounts.Accounts
 import com.test.palmapi.database.chats.ChatMessage
 import com.test.palmapi.dto.ApiPrompt
 import com.test.palmapi.dto.PalmApi
@@ -37,9 +38,16 @@ class MainViewModel @Inject constructor(
     val savedMessages: Flow<List<ChatMessage>>
     var isBlurred: MutableState<Boolean> = mutableStateOf(false)
     var savedName: MutableState<String> = mutableStateOf("")
+    val allAccounts: Flow<List<Accounts>>
 
     private val _state = MutableStateFlow(SignInState())
     val state = _state.asStateFlow()
+
+    init {
+        allMessages = dbRepository.allMessages
+        savedMessages = dbRepository.getSavedMessage(savedName.value)
+        allAccounts = dbRepository.allAccounts
+    }
 
     fun onSignInResult(result: SignInResult) {
         _state.update {
@@ -54,11 +62,31 @@ class MainViewModel @Inject constructor(
         _state.update { SignInState() }
     }
 
-
-    init {
-        allMessages = dbRepository.allMessages
-        savedMessages = dbRepository.getSavedMessage(savedName.value)
+    fun addAccount(
+        firstName: String,
+        lastName: String,
+        email: String,
+        photoUrl: String,
+        uniqueId: String,
+        isCurrent: Boolean = false,
+        type: String
+    ) {
+        viewModelScope.launch {
+            Log.i("Type", type)
+            dbRepository.insertAccount(
+                Accounts(
+                    firstName = firstName,
+                    lastName = lastName,
+                    email = email,
+                    photoUrl = photoUrl,
+                    uniqueId = uniqueId,
+                    isCurrent = isCurrent,
+                    type = type
+                )
+            )
+        }
     }
+
 
     fun getApiData() {
         viewModelScope.launch {
@@ -87,6 +115,18 @@ class MainViewModel @Inject constructor(
     fun insertChat(chatMessage: ChatMessage) {
         viewModelScope.launch {
             dbRepository.insertMessage(chatMessage)
+        }
+    }
+
+    fun updateCurrentAccount(isCurrent: Boolean, uniqueId: String) {
+        viewModelScope.launch {
+            dbRepository.updateCurrentAccount(isCurrent, uniqueId)
+        }
+    }
+
+    fun removeCurrentAccount() {
+        viewModelScope.launch {
+            dbRepository.removeCurrentAccount()
         }
     }
 

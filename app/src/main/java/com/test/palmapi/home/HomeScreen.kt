@@ -23,6 +23,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import com.test.palmapi.MainViewModel
 import com.test.palmapi.newChat.ChatCard
 import com.test.palmapi.ui.theme.appGradient
@@ -34,6 +35,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(
+    navHostController: NavHostController,
     viewModel: MainViewModel,
     photoUrl: String,
     name: String,
@@ -46,7 +48,14 @@ fun HomeScreen(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val coroutineScope = rememberCoroutineScope()
     ModalNavigationDrawer(drawerContent = {
-        NavigationDrawer(drawerState, photoUrl, name, email)
+        NavigationDrawer(
+            drawerState,
+            photoUrl,
+            name,
+            email,
+            viewModel = viewModel,
+            navController = navHostController
+        )
     }, drawerState = drawerState, gesturesEnabled = drawerState.isOpen) {
         Scaffold(
             topBar = {

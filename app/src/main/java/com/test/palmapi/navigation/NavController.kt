@@ -7,7 +7,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.navigation.animation.AnimatedNavHost
@@ -26,10 +25,9 @@ import com.test.palmapi.savedChat.SavedChat
 @Composable
 fun NavController() {
     val navController = rememberAnimatedNavController()
-    var user by remember { mutableStateOf(Firebase.auth.currentUser) }
+    val user by remember { mutableStateOf(Firebase.auth.currentUser) }
     user?.let {
         for (profile in it.providerData) {
-            val providerId = profile.providerId
             Log.i("Email-Profile2", profile.email.toString())
 
         }
@@ -41,12 +39,21 @@ fun NavController() {
     val email = dataStore.getEmail.collectAsState(initial = "")
     Log.i("Name", name.value)
     val pfp = dataStore.getPfp.collectAsState(initial = "")
-    AnimatedNavHost(navController = navController, startDestination = Screens.Login.route) {
+    AnimatedNavHost(
+        navController = navController,
+        startDestination = if (user != null) Screens.NewChat.route else Screens.Login.route
+    ) {
         composable(Screens.Login.route) {
             LoginScreen(navHostController = navController, viewModel = viewModel)
         }
         composable(Screens.NewChat.route) {
-            NewChat(navHostController = navController, photoUrl = pfp.value, viewModel = viewModel)
+            NewChat(
+                navHostController = navController,
+                photoUrl = pfp.value,
+                name = name.value,
+                email = email.value,
+                viewModel = viewModel
+            )
         }
 
         composable(Screens.SavedChat.route) {
@@ -58,7 +65,8 @@ fun NavController() {
                 viewModel = viewModel,
                 photoUrl = pfp.value,
                 name = name.value,
-                email = email.value
+                email = email.value,
+                navHostController = navController
             )
         }
 

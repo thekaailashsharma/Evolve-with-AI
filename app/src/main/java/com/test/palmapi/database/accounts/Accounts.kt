@@ -10,5 +10,7 @@ data class Accounts(
     val email: String,
     val photoUrl: String?,
     @PrimaryKey(autoGenerate = false)
-    val uniqueId: Int = 0
+    val uniqueId: String,
+    val isCurrent: Boolean = false,
+    val type: String
 )

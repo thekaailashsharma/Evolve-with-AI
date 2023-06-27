@@ -15,4 +15,11 @@ interface AccountsDao {
     @Query("SELECT * FROM accounts")
     fun getAccount(): Flow<List<Accounts>>
 
+    @Query("Update accounts set isCurrent = :isCurrent where uniqueId = :uniqueId")
+    suspend fun updateCurrentAccount(isCurrent: Boolean, uniqueId: String)
+
+    @Query("Update accounts set isCurrent = 0")
+    suspend fun removeCurrentAccount()
+
 }
+

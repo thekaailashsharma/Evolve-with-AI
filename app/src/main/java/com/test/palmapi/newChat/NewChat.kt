@@ -101,6 +101,8 @@ import kotlinx.coroutines.launch
 fun NewChat(
     navHostController: NavHostController,
     viewModel: MainViewModel = hiltViewModel(),
+    email: String,
+    name: String,
     photoUrl: String,
 ) {
     var text by remember {
@@ -135,6 +137,7 @@ fun NewChat(
         sheetShape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
         sheetPeekHeight = 0.dp,
     ) {
+        val context = LocalContext.current
         Scaffold(
             topBar = {
                 NewChatTopBar(
