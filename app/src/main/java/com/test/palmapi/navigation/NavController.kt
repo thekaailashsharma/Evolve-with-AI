@@ -21,6 +21,7 @@ import com.test.palmapi.login.LoginScreen
 import com.test.palmapi.mlkit.ModalCamera
 import com.test.palmapi.newChat.NewChat
 import com.test.palmapi.savedChat.SavedChat
+import com.test.palmapi.services.OurServices
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -42,7 +43,7 @@ fun NavController() {
     val pfp = dataStore.getPfp.collectAsState(initial = "")
     AnimatedNavHost(
         navController = navController,
-        startDestination = Screens.ModalCamera.route
+        startDestination = Screens.OurServices.route
 //        startDestination = if (user != null) Screens.NewChat.route else Screens.Login.route
     ) {
         composable(Screens.Login.route) {
@@ -74,6 +75,10 @@ fun NavController() {
 
         composable(Screens.ModalCamera.route) {
             ModalCamera()
+        }
+
+        composable(Screens.OurServices.route) {
+            OurServices()
         }
 
     }
