@@ -116,6 +116,26 @@ dependencies {
     //DataStore
     implementation(libs.datastore.core)
 
+    //Permissions
+    implementation(libs.permissions)
+
+    //CameraX
+    implementation(libs.cameraX.core)
+    implementation(libs.cameraX.lifecycle)
+    implementation(libs.cameraX.view)
+    implementation(libs.cameraX.camera2)
+    implementation(libs.camera.camera2)
+    implementation(libs.camera.lifecycle)
+    implementation(libs.camera.view)
+
+    //MlKit
+    implementation(libs.mlkit.barcode)
+
+    //TextRecognition
+    implementation(libs.play.services.mlkit.text.recognition.common)
+    implementation(libs.play.services.mlkit.text.recognition) //LatinScript
+
+
     //Test Android
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)

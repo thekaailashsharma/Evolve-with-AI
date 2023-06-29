@@ -8,9 +8,9 @@ import android.app.NotificationManager
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import androidx.core.app.NotificationCompat
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
+import androidx.core.app.NotificationCompat
 import com.test.palmapi.dto.ApiPrompt
 import com.test.palmapi.dto.PalmApi
 import com.test.palmapi.dto.Prompt
@@ -135,6 +135,7 @@ class MyAccessibilityService : AccessibilityService() {
     private fun extractMyMatchValue(input: String): String? {
         val regexPattern = "\\{\\{(?<MyMatch>.*?)\\}\\}".toRegex()
         val match = regexPattern.find(input)
+        Log.i("Accessibility", "match: $match")
         return match?.groups?.get("MyMatch")?.value
     }
 

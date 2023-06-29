@@ -18,6 +18,7 @@ import com.test.palmapi.MainViewModel
 import com.test.palmapi.datastore.UserDatastore
 import com.test.palmapi.home.HomeScreen
 import com.test.palmapi.login.LoginScreen
+import com.test.palmapi.mlkit.ModalCamera
 import com.test.palmapi.newChat.NewChat
 import com.test.palmapi.savedChat.SavedChat
 
@@ -41,7 +42,8 @@ fun NavController() {
     val pfp = dataStore.getPfp.collectAsState(initial = "")
     AnimatedNavHost(
         navController = navController,
-        startDestination = if (user != null) Screens.NewChat.route else Screens.Login.route
+        startDestination = Screens.ModalCamera.route
+//        startDestination = if (user != null) Screens.NewChat.route else Screens.Login.route
     ) {
         composable(Screens.Login.route) {
             LoginScreen(navHostController = navController, viewModel = viewModel)
@@ -68,6 +70,10 @@ fun NavController() {
                 email = email.value,
                 navHostController = navController
             )
+        }
+
+        composable(Screens.ModalCamera.route) {
+            ModalCamera()
         }
 
     }
