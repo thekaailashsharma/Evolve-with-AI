@@ -70,6 +70,22 @@
                 android:name="android.accessibility-service"
                 android:resource="@xml/accessibility_service_config" />
         </service>
+
+        <service
+            android:name=".imeService.IMEService"
+            android:exported="false"
+
+            android:label="Evolve AI Keyboard"
+            android:permission="android.permission.BIND_INPUT_METHOD">
+            <intent-filter>
+                <action android:name="android.view.InputMethod" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.view.im"
+                android:resource="@xml/method" />
+        </service>
+
     </application>
 
 </manifest>

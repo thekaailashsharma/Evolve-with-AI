@@ -135,6 +135,13 @@ dependencies {
     implementation(libs.play.services.mlkit.text.recognition.common)
     implementation(libs.play.services.mlkit.text.recognition) //LatinScript
 
+    //Keyboard
+    implementation(libs.kotlin.stdlib)
+    implementation(libs.androidx.lifecycle.service)
+    implementation(libs.lifecycle.runtime.ktx)
+    implementation(libs.splitties.systemservices)
+    implementation(libs.splitties.views)
+    implementation(libs.androidx.appcompat)
 
     //Test Android
     testImplementation(libs.junit)
