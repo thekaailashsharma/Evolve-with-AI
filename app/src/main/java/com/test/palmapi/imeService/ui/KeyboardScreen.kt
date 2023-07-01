@@ -1,5 +1,7 @@
 package com.test.palmapi.imeService.ui
 
+import android.content.Context
+import android.util.Log
 import android.view.KeyEvent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -14,13 +16,11 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,10 +36,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.test.palmapi.R
 import com.test.palmapi.imeService.IMEService
+import com.test.palmapi.imeService.callAPI
 import com.test.palmapi.ui.theme.CardColor
 import com.test.palmapi.ui.theme.appGradient
-import com.test.palmapi.ui.theme.isDarkThemEnabled
 import com.test.palmapi.ui.theme.textColor
+import java.util.regex.Pattern
 
 data class KeyMatrix(
     val key: String? = null,
@@ -142,42 +143,15 @@ fun KeyboardScreen() {
     )
     val capsLockState = remember { mutableStateOf(false) }
     val numericKeyBoard = remember { mutableStateOf(false) }
-    val isAICalled = remember { mutableStateOf(false) }
+    val isAIAnimation = remember { mutableStateOf(false) }
     var text = remember { mutableStateOf("") }
+    val ctx = LocalContext.current
+
     Column(
         modifier = Modifier
             .background(appGradient)
             .fillMaxWidth()
     ) {
-        if (isAICalled.value) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(10.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                val containerColor = if (isDarkThemEnabled) Color(0xFF162130)
-                else Color(0xFFe6e9f1)
-                OutlinedTextField(
-                    value = text.value,
-                    onValueChange = {
-                        text.value = it
-                    },
-                    label = {
-                        Text(text = "Ask me anything", color = textColor)
-                    },
-                    shape = RoundedCornerShape(20.dp),
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = containerColor,
-                        unfocusedContainerColor = containerColor,
-                        disabledContainerColor = containerColor,
-                        focusedTextColor = textColor,
-                        unfocusedTextColor = textColor
-                    )
-                )
-            }
-        }
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -192,9 +166,6 @@ fun KeyboardScreen() {
                 tint = Color.Unspecified,
                 modifier = Modifier
                     .size(30.dp)
-                    .clickable {
-                        isAICalled.value = !isAICalled.value
-                    }
             )
             Icon(
                 painterResource(id = R.drawable.mic),
@@ -204,6 +175,28 @@ fun KeyboardScreen() {
             )
         }
         Divider(color = textColor, thickness = 1.dp)
+        if (checkAICall(text.value)) {
+            Log.i("KeyboardAPIBefore", text.value)
+            val extractedText = extractTextInsideParentheses(text.value)
+            Log.i("KeyboardAPIAfter", extractedText ?: "null")
+            LaunchedEffect(Unit) {
+                val response = callAPI(extractedText ?: "")
+                Log.i("KeyboardAPI", response.toString())
+                if (response != null) {
+                    (ctx as IMEService).currentInputConnection.commitText(
+                        "\n$response",
+                        response.length
+                    )
+                } else {
+                    (ctx as IMEService).currentInputConnection.commitText(
+                        "\nSomething went wrong!",
+                        20
+                    )
+                }
+                text.value = ""
+                isAIAnimation.value = true
+            }
+        }
         if (!numericKeyBoard.value) {
             lowerKeyMatrix.forEach { row ->
                 FixedHeightBox(modifier = Modifier.fillMaxWidth(), height = 58.dp) {
@@ -211,19 +204,21 @@ fun KeyboardScreen() {
                         row.forEach { key ->
                             if (key.icon != null) {
                                 IconKey(
+                                    ctx,
                                     keyboardKey = key.icon,
                                     capsLockState = capsLockState,
-                                    isAICalled = isAICalled,
+                                    isAICalled = isAIAnimation,
                                     text = text,
                                     modifier = Modifier.weight(1f)
                                 )
                             } else {
                                 KeyboardKey(
+                                    ctx,
                                     keyboardKey = (if (capsLockState.value)
                                         key.key?.uppercase() else key.key).toString(),
                                     capsLockState = capsLockState,
                                     numericKeyBoardState = numericKeyBoard,
-                                    isAICalled = isAICalled,
+                                    isAICalled = isAIAnimation,
                                     text = text,
                                     modifier = Modifier.weight(1f)
                                 )
@@ -239,19 +234,21 @@ fun KeyboardScreen() {
                         row.forEach { key ->
                             if (key.icon != null) {
                                 IconKey(
+                                    ctx,
                                     keyboardKey = key.icon,
                                     capsLockState = capsLockState,
-                                    isAICalled = isAICalled,
+                                    isAICalled = isAIAnimation,
                                     text = text,
                                     modifier = Modifier.weight(1f)
                                 )
                             } else {
                                 KeyboardKey(
+                                    ctx,
                                     keyboardKey = (if (capsLockState.value)
                                         key.key?.uppercase() else key.key).toString(),
                                     capsLockState = capsLockState,
                                     numericKeyBoardState = numericKeyBoard,
-                                    isAICalled = isAICalled,
+                                    isAICalled = isAIAnimation,
                                     text = text,
                                     modifier = Modifier.weight(1f)
                                 )
@@ -282,6 +279,7 @@ fun FixedHeightBox(modifier: Modifier, height: Dp, content: @Composable () -> Un
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun IconKey(
+    ctx: Context,
     keyboardKey: Int,
     capsLockState: MutableState<Boolean>,
     isAICalled: MutableState<Boolean>,
@@ -290,7 +288,6 @@ fun IconKey(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val pressed = interactionSource.collectIsPressedAsState()
-    val ctx = LocalContext.current
     Box(
         modifier = modifier.fillMaxHeight(),
         contentAlignment = Alignment.BottomCenter
@@ -321,16 +318,15 @@ fun IconKey(
                         interactionSource = interactionSource,
                         indication = null
                     ) {
-                        if (isAICalled.value) {
-                            text.value = text.value.dropLast(1)
-                        } else {
-                            (ctx as IMEService).currentInputConnection.sendKeyEvent(
-                                KeyEvent(
-                                    KeyEvent.ACTION_DOWN,
-                                    KeyEvent.KEYCODE_DEL,
-                                )
+
+                        text.value = text.value.dropLast(1)
+                        (ctx as IMEService).currentInputConnection.sendKeyEvent(
+                            KeyEvent(
+                                KeyEvent.ACTION_DOWN,
+                                KeyEvent.KEYCODE_DEL,
                             )
-                        }
+                        )
+
                     } else Modifier
                 )
                 .then(if (keyboardKey == R.drawable.enter)
@@ -386,6 +382,7 @@ fun IconKey(
 
 @Composable
 fun KeyboardKey(
+    ctx: Context,
     keyboardKey: String,
     capsLockState: MutableState<Boolean>,
     numericKeyBoardState: MutableState<Boolean>,
@@ -396,7 +393,6 @@ fun KeyboardKey(
 
     val interactionSource = remember { MutableInteractionSource() }
     val pressed = interactionSource.collectIsPressedAsState()
-    val ctx = LocalContext.current
     Box(modifier = modifier.fillMaxHeight(), contentAlignment = Alignment.BottomCenter) {
         Text(
             if (keyboardKey.lowercase() == "space") "space" else keyboardKey,
@@ -409,15 +405,15 @@ fun KeyboardKey(
                         interactionSource = interactionSource,
                         indication = null
                     ) {
-                        if (isAICalled.value) {
-                            text.value += keyboardKey
-                        } else {
-                            (ctx as IMEService).currentInputConnection.commitText(
-                                if (keyboardKey.lowercase() == "space") " "
-                                else keyboardKey,
-                                keyboardKey.length,
-                            )
-                        }
+
+
+                        text.value += if (keyboardKey.lowercase() == "space") " " else keyboardKey
+                        (ctx as IMEService).currentInputConnection.commitText(
+                            if (keyboardKey.lowercase() == "space") " "
+                            else keyboardKey,
+                            keyboardKey.length,
+                        )
+
                     }
                 else
                     Modifier.clickable {
@@ -449,4 +445,29 @@ fun KeyboardKey(
             )
         }
     }
+}
+
+
+fun checkAICall(inputText: String): Boolean {
+    val pattern = Pattern.compile("\\(\\((.*?)\\)\\)", Pattern.DOTALL)
+    val matcher = pattern.matcher(inputText)
+    val result = mutableListOf<String>()
+
+    if (matcher.find()) {
+        return true
+    }
+
+    return false
+}
+
+fun extractTextInsideParentheses(inputText: String): String? {
+    val pattern = Pattern.compile("\\(\\((.*?)\\)\\)", Pattern.DOTALL)
+    val matcher = pattern.matcher(inputText)
+    var result: String? = ""
+
+    while (matcher.find()) {
+        result = matcher.group(1)
+    }
+
+    return result
 }

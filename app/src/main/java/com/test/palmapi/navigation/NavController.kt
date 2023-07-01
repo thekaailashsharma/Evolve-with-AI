@@ -43,8 +43,8 @@ fun NavController() {
     val pfp = dataStore.getPfp.collectAsState(initial = "")
     AnimatedNavHost(
         navController = navController,
-        startDestination = Screens.OurServices.route
-//        startDestination = if (user != null) Screens.NewChat.route else Screens.Login.route
+//        startDestination = Screens.OurServices.route
+        startDestination = if (user != null) Screens.NewChat.route else Screens.Login.route
     ) {
         composable(Screens.Login.route) {
             LoginScreen(navHostController = navController, viewModel = viewModel)

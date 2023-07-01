@@ -1,16 +1,25 @@
 package com.test.palmapi
 
+import android.Manifest
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.AccessibilityServiceInfo
 import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.BroadcastReceiver
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
+import android.widget.Toast
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import com.test.palmapi.dto.ApiPrompt
 import com.test.palmapi.dto.PalmApi
 import com.test.palmapi.dto.Prompt
@@ -71,10 +80,10 @@ class MyAccessibilityService : AccessibilityService() {
                     result = callAPI(text)
                     Log.i("Accessibility", "result: $result")
                     result?.let { copyToClipboard(it) }
-                    fireNotification(
+                    fireNotificationCopy(
                         this@MyAccessibilityService,
-                        "PalmAPI",
-                        "Text generated!"
+                        "Text generated!",
+                        result ?: "No text generated"
                     )
                 }
 
@@ -133,7 +142,8 @@ class MyAccessibilityService : AccessibilityService() {
     }
 
     private fun extractMyMatchValue(input: String): String? {
-        val regexPattern = "\\{\\{(?<MyMatch>.*?)\\}\\}".toRegex()
+        val regexPattern =
+            "\\{\\{(?<MyMatch>.*?)\\}\\}".toRegex(option = RegexOption.DOT_MATCHES_ALL)
         val match = regexPattern.find(input)
         Log.i("Accessibility", "match: $match")
         return match?.groups?.get("MyMatch")?.value
@@ -156,14 +166,44 @@ class MyAccessibilityService : AccessibilityService() {
         notificationManager?.createNotificationChannel(channel)
     }
 
+    @SuppressLint("NotificationPermission")
+    fun showCopy(context: Context, title: String, message: String) {
+        val notificationBuilder = NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(R.drawable.appicon)
+            .setContentTitle(title)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(message))
+            .setContentText(message)
+            .setPriority(NotificationCompat.PRIORITY_MAX)
+            .addAction(
+                R.drawable.appicon,
+                "Copy",
+                createCopyActionPendingIntent(context, message)
+            )
+
+        val notificationManager = NotificationManagerCompat.from(context)
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return
+        }
+        notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
+    }
+
     // Create and display the notification
     @SuppressLint("NotificationPermission")
-    private fun showNotification(context: Context, title: String, message: String) {
+    private fun showStart(context: Context, title: String, message: String) {
         val notificationBuilder = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_launcher_background)
+            .setSmallIcon(R.drawable.appicon)
             .setContentTitle(title)
             .setContentText(message)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
 
         val notificationManager = context.getSystemService(NotificationManager::class.java)
         notificationManager?.notify(NOTIFICATION_ID, notificationBuilder.build())
@@ -172,7 +212,48 @@ class MyAccessibilityService : AccessibilityService() {
     // Call this function in your AccessibilityService after the task is completed
     private fun fireNotification(context: Context, title: String, message: String) {
         createNotificationChannel(context)
-        showNotification(context, title, message)
+        showStart(context, title, message)
+    }
+
+    private fun fireNotificationCopy(context: Context, title: String, message: String) {
+        createNotificationChannel(context)
+        showCopy(context, title, message)
+    }
+
+    private fun createCopyActionPendingIntent(context: Context, message: String) =
+        NotificationActionHelper.createCopyPendingIntent(context, message)
+
+    object NotificationActionHelper {
+        private const val COPY_ACTION = "com.your.package.ACTION_COPY"
+        private const val COPY_ACTION_REQUEST_CODE = 101
+
+        fun createCopyPendingIntent(context: Context, text: String): PendingIntent {
+            val copyIntent = Intent().apply {
+                putExtra("text", text)
+            }
+
+            val broadcastReceiver = object : BroadcastReceiver() {
+                override fun onReceive(context: Context, intent: Intent) {
+                    if (intent.action == COPY_ACTION) {
+                        val clipboard =
+                            context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        val copiedText = intent.getStringExtra("text")
+                        clipboard.setPrimaryClip(ClipData.newPlainText("Copied Text", copiedText))
+                        Toast.makeText(context, "Text copied to clipboard", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+                }
+            }
+
+            context.registerReceiver(broadcastReceiver, IntentFilter(COPY_ACTION))
+
+            return PendingIntent.getBroadcast(
+                context,
+                COPY_ACTION_REQUEST_CODE,
+                copyIntent,
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            )
+        }
     }
 
 
