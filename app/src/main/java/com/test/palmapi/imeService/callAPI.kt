@@ -1,5 +1,6 @@
 package com.test.palmapi.imeService
 
+import com.test.palmapi.BuildConfig
 import com.test.palmapi.dto.ApiPrompt
 import com.test.palmapi.dto.PalmApi
 import com.test.palmapi.dto.Prompt
@@ -35,7 +36,7 @@ private val httpClient = HttpClient(CIO) {
     }
 }
 private val apiEndpoint =
-    "https://generativelanguage.googleapis.com/v1beta2/models/text-bison-001:generateText?key=AIzaSyD3Uedh-W7B2T9BHuls61gMBtGMrgtwei8"
+    "https://generativelanguage.googleapis.com/v1beta2/models/text-bison-001:generateText?key=${BuildConfig.API_KEY}"
 
 @OptIn(DelicateCoroutinesApi::class)
 suspend fun callAPI(text: String?): String? = suspendCoroutine { continuation ->

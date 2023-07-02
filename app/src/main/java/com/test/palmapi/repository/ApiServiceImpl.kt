@@ -1,6 +1,7 @@
 package com.test.palmapi.repository
 
 import android.util.Log
+import com.test.palmapi.BuildConfig
 import com.test.palmapi.dto.ApiPrompt
 import com.test.palmapi.dto.Candidate
 import com.test.palmapi.dto.PalmApi
@@ -17,7 +18,7 @@ class ApiServiceImpl(
     override suspend fun getApiData(apiPrompt: ApiPrompt): PalmApi {
         try {
             val a = client.post<PalmApi> {
-                url("${ApiRoutes.BASE_URL}?key=AIzaSyD3Uedh-W7B2T9BHuls61gMBtGMrgtwei8")
+                url("${ApiRoutes.BASE_URL}?key=${BuildConfig.API_KEY}")
                 body = apiPrompt
                 headers {
                     this.append("Content-Type", "application/json")

@@ -1,3 +1,6 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 @Suppress("DSL_SCOPE_VIOLATION") // TODO: Remove once KTIJ-19369 is fixed
 plugins {
     alias(libs.plugins.androidApplication)
@@ -26,6 +29,11 @@ android {
     }
 
     buildTypes {
+        debug {
+            val localProperties = Properties()
+            localProperties.load(FileInputStream(rootProject.file("local.properties")))
+            buildConfigField("String", "API_KEY", "${localProperties["API_KEY"]}")
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
