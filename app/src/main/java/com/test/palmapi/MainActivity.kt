@@ -2,7 +2,6 @@ package com.test.palmapi
 
 import android.content.Intent
 import android.os.Bundle
-import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
@@ -37,17 +36,7 @@ class MainActivity : ComponentActivity() {
 //            requestAccessibilityPermission()
 //        }
 //    }
-    private fun isAccessibilityPermissionGranted(): Boolean {
-        val accessibilityEnabled =
-            Settings.Secure.getInt(contentResolver, Settings.Secure.ACCESSIBILITY_ENABLED, 0)
-        return accessibilityEnabled == 1
-    }
 
 
-    private fun requestAccessibilityPermission() {
-        val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
-        requestAccessibilityPermissionLauncher.launch(intent)
-    }
 }
-
 

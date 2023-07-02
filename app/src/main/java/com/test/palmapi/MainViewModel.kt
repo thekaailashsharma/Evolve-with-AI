@@ -38,9 +38,13 @@ class MainViewModel @Inject constructor(
     val message: MutableState<String> = mutableStateOf("")
     fun allMessages(uid: String): Flow<List<ChatMessage>> = dbRepository.allMessages(uid)
     fun getType(uid: String) = dbRepository.getType(uid)
-    val savedMessages: Flow<List<ChatMessage>>
+    fun savedMessages(savedName: String): Flow<List<ChatMessage>> =
+        dbRepository.getSavedMessage(savedName)
+
+    fun getUniqueSaved() = dbRepository.getUniqueSaved()
     var isBlurred: MutableState<Boolean> = mutableStateOf(false)
     var savedName: MutableState<String> = mutableStateOf("")
+    var isSaved: MutableState<Boolean> = mutableStateOf(false)
     var uid: MutableState<String> = mutableStateOf("")
     val allAccounts: Flow<List<Accounts>>
     val datastore = UserDatastore(application.applicationContext)
@@ -54,7 +58,6 @@ class MainViewModel @Inject constructor(
                 uid.value = it
             }
         }
-        savedMessages = dbRepository.getSavedMessage(savedName.value)
         allAccounts = dbRepository.allAccounts
     }
 
@@ -141,9 +144,9 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun saveChatMessage(name: String, isPined: Boolean) {
+    fun saveChatMessage(name: String, previousName: String = "New Chat", isPined: Boolean) {
         viewModelScope.launch {
-            dbRepository.saveChatMessage(name, isPined)
+            dbRepository.saveChatMessage(name, previousName, isPined)
         }
     }
 

@@ -1,6 +1,12 @@
 package com.test.palmapi.newChat
 
+import android.Manifest
+import android.app.Activity
 import android.content.Intent
+import android.os.Bundle
+import android.speech.RecognitionListener
+import android.speech.RecognizerIntent
+import android.speech.SpeechRecognizer
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.core.animateFloatAsState
@@ -47,7 +53,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -55,6 +63,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
@@ -63,12 +72,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -80,6 +91,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.rememberLottieComposition
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.test.palmapi.MainViewModel
 import com.test.palmapi.R
 import com.test.palmapi.database.chats.ChatMessage
@@ -93,10 +109,14 @@ import com.test.palmapi.ui.theme.textColor
 import com.test.palmapi.utils.BottomSheetContent
 import com.test.palmapi.utils.NewChatBottomBar
 import com.test.palmapi.utils.NewChatTopBar
+import com.test.palmapi.utils.PermissionDrawer
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(
+    ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class,
+    ExperimentalComposeUiApi::class
+)
 @Composable
 fun NewChat(
     navHostController: NavHostController,
@@ -106,9 +126,13 @@ fun NewChat(
     photoUrl: String,
     uid: String,
 ) {
-    var text by remember {
+    var text = remember {
         mutableStateOf(TextFieldValue(""))
     }
+    var isRecording = remember {
+        mutableStateOf(false)
+    }
+    val context = LocalContext.current
     val lazyListState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
     val result by viewModel.allMessages(uid).collectAsState(initial = listOf())
@@ -129,156 +153,261 @@ fun NewChat(
         )
     )
 
-    BottomSheetScaffold(
-        sheetContent = {
-            BottomSheetContent(viewModel)
-        },
-        sheetContainerColor = CardColor.copy(0.95f),
-        scaffoldState = modalSheetState,
-        sheetShape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
-        sheetPeekHeight = 0.dp,
+    val permissionState = rememberMultiplePermissionsState(
+        permissions = listOf(
+            Manifest.permission.RECORD_AUDIO,
+        )
+    )
+    val permissionDrawerState = rememberBottomSheetScaffoldState(
+        if (permissionState.allPermissionsGranted) SheetState(
+            initialValue = SheetValue.Hidden,
+            skipPartiallyExpanded = true
+        )
+        else SheetState(
+            initialValue = SheetValue.Expanded,
+            skipPartiallyExpanded = true
+        )
+    )
+    val gesturesEnabled by remember { derivedStateOf { permissionState.allPermissionsGranted } }
+    Log.i("GesturesEnabled", gesturesEnabled.toString())
+    PermissionDrawer(
+        drawerState = permissionDrawerState,
+        model = R.drawable.mic1,
+        permissionState = permissionState,
+        rationaleText = "To continue, allow " +
+                "${stringResource(id = R.string.app_name)} " +
+                "to access your speech to text Tap Settings > Permission, and turn " +
+                "\"Access Microphone On\" on.",
+        withoutRationaleText = "Microphone permission required for this feature to be available." +
+                " Please grant the permission.",
+        gesturesEnabled = gesturesEnabled,
     ) {
-        val context = LocalContext.current
-        Scaffold(
-            topBar = {
-                NewChatTopBar(
-                    navHostController = navHostController,
-                    onSave = {
-                        coroutineScope.launch {
-                            modalSheetState.bottomSheetState.expand()
-                        }
-                    }
-                )
+        BottomSheetScaffold(
+            sheetContent = {
+                BottomSheetContent(viewModel, navHostController)
             },
-            bottomBar = {
-                NewChatBottomBar(
-                    viewModel = viewModel,
-                    text = text,
-                    onTextChange = {
-                        text = it
-                    },
-                    onClick = {
-                        viewModel.insertChat(
-                            ChatMessage(
-                                message = text.text,
-                                time = System.currentTimeMillis(),
-                                isUser = true,
-                                uID = uid,
-                            )
-                        )
-                        viewModel.message.value = text.text
-                        viewModel.getApiData()
-                        coroutineScope.launch {
-                            try {
-                                if (result.isNotEmpty()) {
-                                    lazyListState.animateScrollToItem(result.size - 1)
-                                }
-                            } catch (e: Exception) {
-                                Log.i("Message", e.toString())
+            sheetContainerColor = CardColor.copy(0.95f),
+            scaffoldState = modalSheetState,
+            sheetShape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
+            sheetPeekHeight = 0.dp,
+        ) {
+            Scaffold(
+                topBar = {
+                    NewChatTopBar(
+                        viewModel = viewModel,
+                        navHostController = navHostController,
+                        onSave = {
+                            coroutineScope.launch {
+                                modalSheetState.bottomSheetState.expand()
                             }
                         }
-                        text = TextFieldValue("")
-
-                    }
-                )
-            }
-        ) {
-            println(it)
-            if (result.isEmpty()) {
-                Column(
-                    modifier = Modifier
-                        .background(appGradient)
-                        .fillMaxSize()
-                        .padding(top = 150.dp),
-                    verticalArrangement = Arrangement.Top,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(text = buildAnnotatedString {
-                        withStyle(
-                            style = SpanStyle(
-                                fontFamily = monteNormal,
-                                color = textColor,
-                                fontSize = 30.sp,
-                                fontWeight = FontWeight.Black
+                    )
+                },
+                bottomBar = {
+                    NewChatBottomBar(
+                        navController = navHostController,
+                        viewModel = viewModel,
+                        text = text.value,
+                        onTextChange = {
+                            text.value = it
+                        },
+                        onSpeechToText = {
+                            convertSpeechToText(
+                                context as Activity,
+                                isRecording = isRecording,
+                                text = text
                             )
-                        ) {
-                            append("Hello, Ask Me")
-                        }
-                        append("\n")
-                        withStyle(
-                            SpanStyle(
-                                fontFamily = monteNormal,
-                                color = textColor,
-                                fontSize = 19.sp,
-                                fontWeight = FontWeight.Normal
+                        },
+                        onClick = {
+                            viewModel.insertChat(
+                                ChatMessage(
+                                    message = text.value.text,
+                                    time = System.currentTimeMillis(),
+                                    isUser = true,
+                                    uID = uid,
+                                )
                             )
-                        ) {
-                            append("Anything ...")
-                        }
-                    })
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = "I'm your assistant.",
-                        color = textColor,
-                        fontFamily = monteSB
-                    )
-                    Spacer(modifier = Modifier.height(15.dp))
-                    RepeatedCard(
-                        icon = R.drawable.beta,
-                        description = "I'm still under development"
-                    )
-                    Spacer(modifier = Modifier.height(10.dp))
-                    RepeatedCard(
-                        icon = R.drawable.remember,
-                        description = "I can remember our conversations"
-                    )
-                    Spacer(modifier = Modifier.height(10.dp))
-                    RepeatedCard(
-                        icon = R.drawable.privacy,
-                        description = "Your Privacy is completely secured"
-                    )
-                    Spacer(modifier = Modifier.height(10.dp))
-                    RepeatedCard(
-                        icon = R.drawable.tip,
-                        description = "Long Press on Chat to see options"
-                    )
-                    Spacer(modifier = Modifier.height(10.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.MoreHoriz,
-                            contentDescription = "more",
-                            tint = textColor.copy(0.45f),
-                            modifier = Modifier.size(40.dp)
-                        )
+                            viewModel.message.value = text.value.text
+                            viewModel.getApiData()
+                            coroutineScope.launch {
+                                try {
+                                    if (result.isNotEmpty()) {
+                                        lazyListState.animateScrollToItem(result.size - 1)
+                                    }
+                                } catch (e: Exception) {
+                                    Log.i("Message", e.toString())
+                                }
+                            }
+                            text.value = TextFieldValue("")
 
-                    }
+                        }
+                    )
                 }
-            } else {
-                LazyColumn(
-                    modifier = Modifier
-                        .background(appGradient)
-                        .fillMaxSize()
-                        .padding(top = 30.dp),
-                    contentPadding = PaddingValues(top = 40.dp, bottom = 130.dp),
-                    state = lazyListState,
-                ) {
-                    items(result) { message ->
-                        ChatCard(
-                            text = message.message ?: "",
-                            isUser = message.isUser,
-                            viewModel = viewModel,
-                            imageUrl = photoUrl,
-                            time = message.time,
-                        )
-                    }
+            ) {
+                Box {
+                    println(it)
+                    if (result.isEmpty()) {
+                        Column(
+                            modifier = Modifier
+                                .background(appGradient)
+                                .fillMaxSize()
+                                .padding(top = 150.dp),
+                            verticalArrangement = Arrangement.Top,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(text = buildAnnotatedString {
+                                withStyle(
+                                    style = SpanStyle(
+                                        fontFamily = monteNormal,
+                                        color = textColor,
+                                        fontSize = 30.sp,
+                                        fontWeight = FontWeight.Black
+                                    )
+                                ) {
+                                    append("Hello, Ask Me")
+                                }
+                                append("\n")
+                                withStyle(
+                                    SpanStyle(
+                                        fontFamily = monteNormal,
+                                        color = textColor,
+                                        fontSize = 19.sp,
+                                        fontWeight = FontWeight.Normal
+                                    )
+                                ) {
+                                    append("Anything ...")
+                                }
+                            })
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = "I'm your assistant.",
+                                color = textColor,
+                                fontFamily = monteSB
+                            )
+                            Spacer(modifier = Modifier.height(15.dp))
+                            RepeatedCard(
+                                icon = R.drawable.beta,
+                                description = "I'm still under development"
+                            )
+                            Spacer(modifier = Modifier.height(10.dp))
+                            RepeatedCard(
+                                icon = R.drawable.remember,
+                                description = "I can remember our conversations"
+                            )
+                            Spacer(modifier = Modifier.height(10.dp))
+                            RepeatedCard(
+                                icon = R.drawable.privacy,
+                                description = "Your Privacy is completely secured"
+                            )
+                            Spacer(modifier = Modifier.height(10.dp))
+                            RepeatedCard(
+                                icon = R.drawable.tip,
+                                description = "Long Press on Chat to see options"
+                            )
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.MoreHoriz,
+                                    contentDescription = "more",
+                                    tint = textColor.copy(0.45f),
+                                    modifier = Modifier.size(40.dp)
+                                )
 
+                            }
+                        }
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier
+                                .background(appGradient)
+                                .fillMaxSize()
+                                .padding(top = 30.dp),
+                            contentPadding = PaddingValues(top = 40.dp, bottom = 130.dp),
+                            state = lazyListState,
+                        ) {
+                            items(result) { message ->
+                                ChatCard(
+                                    text = message.message ?: "",
+                                    isUser = message.isUser,
+                                    viewModel = viewModel,
+                                    imageUrl = photoUrl,
+                                    time = message.time,
+                                )
+                            }
+
+                        }
+                    }
+                    if (isRecording.value) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            val currenanim by rememberLottieComposition(
+                                spec = LottieCompositionSpec.Asset("voice.json")
+                            )
+                            LottieAnimation(
+                                composition = currenanim,
+                                iterations = Int.MAX_VALUE,
+                                contentScale = ContentScale.Crop,
+                                speed = 0.5f,
+                                modifier = Modifier
+                                    .size(150.dp)
+                            )
+                        }
+                    }
                 }
             }
         }
     }
+}
+
+fun convertSpeechToText(
+    activity: Activity,
+    text: MutableState<TextFieldValue>,
+    isRecording: MutableState<Boolean>
+) {
+    val speechRecognizer = SpeechRecognizer.createSpeechRecognizer(activity)
+    val speechIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+        putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+    }
+
+    val speechListener = object : RecognitionListener {
+        override fun onReadyForSpeech(params: Bundle?) {
+            isRecording.value = true
+        }
+
+        override fun onBeginningOfSpeech() {}
+
+        override fun onRmsChanged(rmsdB: Float) {}
+
+        override fun onBufferReceived(buffer: ByteArray?) {}
+
+        override fun onEndOfSpeech() {
+            isRecording.value = false
+        }
+
+        override fun onError(error: Int) {
+            isRecording.value = false
+        }
+
+        override fun onResults(results: Bundle?) {
+            val data = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+            val recognizedText = data?.getOrNull(0)
+            recognizedText?.let {
+                // Handle the recognized text here
+                text.value = TextFieldValue(it)
+            }
+        }
+
+        override fun onPartialResults(partialResults: Bundle?) {}
+
+        override fun onEvent(eventType: Int, params: Bundle?) {}
+    }
+
+    speechRecognizer.setRecognitionListener(speechListener)
+    speechRecognizer.startListening(speechIntent)
 }
 
 

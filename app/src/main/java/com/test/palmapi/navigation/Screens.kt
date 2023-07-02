@@ -7,5 +7,7 @@ sealed class Screens(val route: String){
     object SavedChat : Screens("savedChat")
     object ModalCamera : Screens("modalCamera")
     object OurServices : Screens("ourServices")
+    object BarCodeOnly : Screens("barCodeOnly")
+    object TextROnly : Screens("textROnly")
 
 }

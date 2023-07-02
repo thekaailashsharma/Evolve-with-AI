@@ -20,11 +20,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowDropDown
-import androidx.compose.material.icons.outlined.Feedback
-import androidx.compose.material.icons.outlined.HelpCenter
-import androidx.compose.material.icons.outlined.Logout
-import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.icons.outlined.StarRate
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -64,6 +59,7 @@ import com.test.palmapi.ui.theme.buttonColor
 import com.test.palmapi.ui.theme.githubColors
 import com.test.palmapi.ui.theme.googleColors
 import com.test.palmapi.ui.theme.isDarkThemEnabled
+import com.test.palmapi.ui.theme.monteBold
 import com.test.palmapi.ui.theme.monteSB
 import com.test.palmapi.ui.theme.openDeviceThemeSettings
 import com.test.palmapi.ui.theme.textColor
@@ -183,29 +179,20 @@ fun NavigationDrawer(
                 }
             }
             Spacer(modifier = Modifier.height(40.dp))
-            DrawerCard(
-                image = Icons.Outlined.Settings,
-                description = "Settings"
-            )
-            Spacer(modifier = Modifier.height(20.dp))
-            DrawerCard(
-                image = Icons.Outlined.HelpCenter,
-                description = "Help Center"
-            )
-            Spacer(modifier = Modifier.height(20.dp))
-            DrawerCard(
-                image = Icons.Outlined.Feedback,
-                description = "Send Feedback"
-            )
-            Spacer(modifier = Modifier.height(20.dp))
-            DrawerCard(
-                image = Icons.Outlined.StarRate,
-                description = "Rate Us"
-            )
-            Spacer(modifier = Modifier.height(20.dp))
-            DrawerCard(
-                image = Icons.Outlined.Logout,
-                description = "Logout"
+            Text(
+                text = "\uD83D\uDCF1 Evolve with AI: Your ultimate Android companion! \uD83D\uDE80✨\n" +
+                        "Supercharge your device with our cutting-edge AI integration \uD83E\uDD16\uD83D\uDD0C," +
+                        " bringing you enhanced keyboard accessibility \uD83C\uDFB9 and powerful machine learning " +
+                        "capabilities \uD83D\uDCDA\uD83D\uDCA1. Experience the future of Android, where innovation meets" +
+                        " accessibility. Get ready to evolve your digital experience with Evolve with AI! " +
+                        "\uD83C\uDF1F\uD83D\uDD13 \n\n" +
+                        "Are you ready to embrace the power of innovation and take your Android experience " +
+                        "to new heights? \uD83C\uDF1F\uD83E\uDD16",
+                color = textColor.copy(0.5f),
+                fontSize = 10.sp,
+                fontFamily = monteBold,
+                softWrap = true,
+                modifier = Modifier.padding(horizontal = 20.dp)
             )
             Column(
                 modifier = Modifier

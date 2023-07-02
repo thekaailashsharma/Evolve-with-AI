@@ -123,6 +123,7 @@ class MyAccessibilityService : AccessibilityService() {
         // won't be passed to this service.
         clipboardManager = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         val info = AccessibilityServiceInfo()
+        info.description
         info.eventTypes = AccessibilityEvent.TYPE_VIEW_CLICKED or
                 AccessibilityEvent.TYPE_VIEW_FOCUSED or
                 AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED
@@ -130,7 +131,6 @@ class MyAccessibilityService : AccessibilityService() {
 
         // Set the type of feedback your service will provide.
         info.feedbackType = AccessibilityServiceInfo.FEEDBACK_SPOKEN
-
         info.notificationTimeout = 100
         serviceInfo = info
         Log.i("Accessibility", "onServiceConnected")

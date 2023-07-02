@@ -39,14 +39,15 @@ class DatabaseRepo(private val chatDao: ChatDao, private val accountsDao: Accoun
         }
     }
 
-    fun saveChatMessage(name: String, isPined: Boolean) {
+    fun saveChatMessage(name: String, previousName: String = "New Chat", isPined: Boolean) {
         coroutineScope.launch {
-            chatDao.saveChatMessage(name, isPined)
+            chatDao.saveChatMessage(name, previousName, isPined)
         }
     }
 
 
     fun getSavedMessage(name: String) = chatDao.getSavedMessages(name)
+    fun getUniqueSaved() = chatDao.getUniqueSaved()
 
     fun deleteMessage(time: Long) {
         coroutineScope.launch {

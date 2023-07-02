@@ -21,8 +21,14 @@ interface ChatDao {
     @Query("SELECT * FROM chat_message where name = :name")
     fun getSavedMessages(name: String): Flow<List<ChatMessage>>
 
-    @Query("Update chat_message set name = :name, isPined = :isPined where name = 'New Chat'")
-    suspend fun saveChatMessage(name: String, isPined: Boolean)
+    @Query(
+        "SELECT MAX(time) as time, message, isUser, name, isPined, id, uID FROM chat_message " +
+                "where isUser = 1 GROUP BY name"
+    )
+    fun getUniqueSaved(): Flow<List<ChatMessage>>
+
+    @Query("Update chat_message set name = :name, isPined = :isPined where name = :previousName")
+    suspend fun saveChatMessage(name: String, previousName: String = "New Chat", isPined: Boolean)
 
 
 }

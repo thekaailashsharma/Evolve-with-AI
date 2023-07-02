@@ -2,4 +2,9 @@
     <string name="app_name">Evolve</string>
     <string name="accountType">com.test.palmapi.account</string>
     <string name="authTokenType">palmapi-authToken</string>
+    <string name="accessibility_service_description">
+        Type Anything in curly braces to use AI.
+        We protect your privacy and do not store any data.
+        Evolve with AI.
+    </string>
 </resources>

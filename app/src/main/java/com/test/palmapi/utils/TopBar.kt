@@ -1,6 +1,7 @@
 package com.test.palmapi.utils
 
 
+import android.content.Intent
 import android.util.Log
 import android.view.ViewTreeObserver
 import android.widget.Toast
@@ -38,6 +39,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -80,12 +82,15 @@ import com.test.palmapi.ui.theme.textColor
 import com.test.palmapi.ui.theme.twitterColors
 import com.test.palmapi.ui.theme.ybc
 
+
 @Composable
 fun NewChatTopBar(
+    viewModel: MainViewModel,
     onSave: () -> Unit = {},
     navHostController: NavHostController
 ) {
     val texts = listOf("New Chat")
+    val context = LocalContext.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -101,13 +106,17 @@ fun NewChatTopBar(
             imageVector = Icons.Sharp.ArrowBackIos,
             contentDescription = "Back",
             tint = textColor,
-            modifier = Modifier.size(24.dp)
+            modifier = Modifier
+                .size(24.dp)
+                .clickable {
+                    navHostController.navigateUp()
+                }
         )
 
         TypewriterText(
-            texts = texts,
-            text = "New Chat",
-            modifier = Modifier.padding(start = 90.dp),
+            texts = if (viewModel.isSaved.value) listOf(viewModel.savedName.value) else texts,
+            text = if (viewModel.isSaved.value) viewModel.savedName.value else "",
+            modifier = Modifier.padding(start = if (viewModel.isSaved.value) 5.dp else 30.dp),
             delay = 160L
         )
         Row(
@@ -133,7 +142,16 @@ fun NewChatTopBar(
                 modifier = Modifier
                     .size(24.dp)
                     .clickable {
-                        navHostController.navigate(Screens.Home.route)
+                        val intent = Intent(Intent.ACTION_SEND)
+                        intent.putExtra(Intent.EXTRA_EMAIL, arrayOf("kailashps.1011@gmail.com"))
+                        intent.putExtra(Intent.EXTRA_SUBJECT, "Feedback:Evolve with AI")
+                        intent.setType("message/rfc822")
+                        context.startActivity(
+                            Intent.createChooser(
+                                intent,
+                                "Please share your feedback"
+                            )
+                        )
                     }
             )
 
@@ -145,6 +163,7 @@ fun NewChatTopBar(
 
 @Composable
 fun ExpandedTopBarHomeScreen(
+    navController: NavHostController,
     imageUrl: String,
     textValue: String,
     type: String,
@@ -225,10 +244,14 @@ fun ExpandedTopBarHomeScreen(
         OutlinedTextField(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 13.dp),
+                .padding(horizontal = 13.dp)
+                .clickable {
+                    navController.navigate(Screens.NewChat.route)
+                },
             value = textValue,
+            enabled = false,
             onValueChange = {
-                onTextChange(it)
+
             },
             label = {
                 Text(text = "Ask me anything...", color = textColor)
@@ -352,11 +375,14 @@ fun CollapsedTopBarHomeScreen(
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun NewChatBottomBar(
+    navController: NavHostController,
     viewModel: MainViewModel,
     text: TextFieldValue,
     onTextChange: (TextFieldValue) -> Unit,
+    onSpeechToText: () -> Unit,
     onClick: () -> Unit
 ) {
+
     val keyboardController = LocalSoftwareKeyboardController.current
     val isKeyboardOpen by keyboardAsState()
     Log.i("Messages", viewModel.listOfMessages.value.toString())
@@ -389,6 +415,9 @@ fun NewChatBottomBar(
                 modifier = Modifier
                     .size(35.dp)
                     .padding(end = 10.dp)
+                    .clickable {
+                        navController.navigate(Screens.ModalCamera.route)
+                    }
             )
             Icon(
                 painter = painterResource(id = R.drawable.mic),
@@ -397,6 +426,9 @@ fun NewChatBottomBar(
                 modifier = Modifier
                     .size(39.dp)
                     .padding(end = 10.dp)
+                    .clickable {
+                        onSpeechToText()
+                    }
             )
         }
         Row(
@@ -477,7 +509,7 @@ fun keyboardAsState(): State<Keyboard> {
 }
 
 @Composable
-fun BottomSheetContent(viewModel: MainViewModel) {
+fun BottomSheetContent(viewModel: MainViewModel, navController: NavHostController) {
     Column(
         modifier = Modifier
             .fillMaxHeight(0.25f)
@@ -485,6 +517,11 @@ fun BottomSheetContent(viewModel: MainViewModel) {
             .padding(start = 17.dp, end = 17.dp, bottom = 10.dp)
     ) {
         var text by remember { mutableStateOf(TextFieldValue("")) }
+        LaunchedEffect(key1 = Unit) {
+            if (viewModel.isSaved.value) {
+                text = TextFieldValue(viewModel.savedName.value)
+            }
+        }
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -505,7 +542,8 @@ fun BottomSheetContent(viewModel: MainViewModel) {
         OutlinedTextField(
             value = text,
             onValueChange = {
-                if (it.text.length <= 20) {
+
+            if (it.text.length <= 20) {
                     text = it
                 } else {
                     Toast.makeText(
@@ -536,7 +574,12 @@ fun BottomSheetContent(viewModel: MainViewModel) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
             Button(
                 onClick = {
-                    viewModel.saveChatMessage(text.text, false)
+                    if (viewModel.isSaved.value) {
+                        viewModel.saveChatMessage(text.text, viewModel.savedName.value, false)
+                        navController.navigateUp()
+                    } else {
+                        viewModel.saveChatMessage(text.text, isPined = false)
+                    }
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = buttonColor
