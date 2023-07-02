@@ -63,11 +63,11 @@ class MyAccessibilityService : AccessibilityService() {
         }
     }
     private val apiEndpoint =
-        "https://generativelanguage.googleapis.com/v1beta2/models/text-bison-001:generateText?key=AIzaSyD3Uedh-W7B2T9BHuls61gMBtGMrgtwei8"
+        "https://generativelanguage.googleapis.com/v1beta2/models/text-bison-001:generateText?key=${BuildConfig.API_KEY}"
 
     @OptIn(DelicateCoroutinesApi::class)
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
-        var result: String? = null
+        var result: String? = ""
         Log.i("Accessibility", "onAccessibilityEvent")
         try {
             Log.i("Accessibility", "source: ${event?.source}")
@@ -111,7 +111,9 @@ class MyAccessibilityService : AccessibilityService() {
                 }
                 val result = response.candidates?.get(0)?.output
                 continuation.resume(result)
+                Log.i("Accessibility", "response: ${response.candidates}")
             } catch (e: Exception) {
+                Log.i("Accessibility", "Exception: ${e.message}")
                 continuation.resume(null)
             }
         }
