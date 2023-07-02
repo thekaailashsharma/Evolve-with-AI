@@ -35,6 +35,9 @@ android {
             buildConfigField("String", "API_KEY", "${localProperties["API_KEY"]}")
         }
         release {
+            val localProperties = Properties()
+            localProperties.load(FileInputStream(rootProject.file("local.properties")))
+            buildConfigField("String", "API_KEY", "${localProperties["API_KEY"]}")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),

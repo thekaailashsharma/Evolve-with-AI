@@ -39,9 +39,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.test.palmapi.MainViewModel
 import com.test.palmapi.bottombar.BottomBar
 import com.test.palmapi.login.ProfileImage
@@ -128,42 +132,95 @@ fun HomeScreen(
                             }
                         )
                     }
-                    item {
-                        Spacer(modifier = Modifier.height(20.dp))
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(start = 20.dp),
-                            horizontalArrangement = Arrangement.Start
-                        ) {
-                            Text(
-                                text = "Your Saved Chats",
-                                color = textColor,
-                                fontSize = 20.sp,
-                                fontFamily = monteSB,
-                                modifier = Modifier.padding(top = 10.dp, bottom = 10.dp)
-                            )
+                    if (result.isNotEmpty()) {
+                        item {
+                            Spacer(modifier = Modifier.height(20.dp))
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(start = 20.dp),
+                                horizontalArrangement = Arrangement.Start
+                            ) {
+                                Text(
+                                    text = "Your Saved Chats",
+                                    color = textColor,
+                                    fontSize = 20.sp,
+                                    fontFamily = monteSB,
+                                    modifier = Modifier.padding(top = 10.dp, bottom = 10.dp)
+                                )
+                            }
                         }
-                    }
-                    result.forEach {
-                        Log.i("HomeScreen", "HomeScreen: $it")
-                    }
-                    items(result) { message ->
-                        if (message.isUser) {
-                            SavedCard(
-                                photoUrl = photoUrl,
-                                savedName = message.name,
-                                timeStamp = getTimeAgo(message.time),
-                                message = message.message ?: "",
-                                onClick = {
-                                    if (message.name != "New Chat") {
-                                        viewModel.savedName.value = message.name
-                                        navHostController.navigate(Screens.SavedChat.route)
-                                    } else {
-                                        navHostController.navigate(Screens.NewChat.route)
+                        result.forEach {
+                            Log.i("HomeScreen", "HomeScreen: $it")
+                        }
+                        items(result) { message ->
+                            if (message.isUser) {
+                                SavedCard(
+                                    photoUrl = photoUrl,
+                                    savedName = message.name,
+                                    timeStamp = getTimeAgo(message.time),
+                                    message = message.message ?: "",
+                                    onClick = {
+                                        if (message.name != "New Chat") {
+                                            viewModel.savedName.value = message.name
+                                            navHostController.navigate(Screens.SavedChat.route)
+                                        } else {
+                                            navHostController.navigate(Screens.NewChat.route)
+                                        }
                                     }
+                                )
+                            }
+                        }
+                    } else {
+                        item {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    val currenanim2 by rememberLottieComposition(
+                                        spec = LottieCompositionSpec.Asset("ai.json")
+                                    )
+                                    LottieAnimation(
+                                        composition = currenanim2,
+                                        iterations = 1,
+                                        contentScale = ContentScale.Crop,
+                                        speed = 0.75f,
+                                        modifier = Modifier
+                                            .size(200.dp)
+                                    )
+
+                                    Text(
+                                        text = "AI is waiting for you to start a chat.",
+                                        color = textColor,
+                                        fontSize = 13.sp,
+                                        fontFamily = monteSB,
+                                        modifier = Modifier.padding(top = 10.dp, bottom = 10.dp)
+                                    )
+                                    Spacer(modifier = Modifier.height(20.dp))
+                                    val currenanim by rememberLottieComposition(
+                                        spec = LottieCompositionSpec.Asset("empty.json")
+                                    )
+                                    LottieAnimation(
+                                        composition = currenanim,
+                                        iterations = 1,
+                                        contentScale = ContentScale.Crop,
+                                        speed = 0.5f,
+                                        modifier = Modifier
+                                            .size(200.dp)
+                                    )
+
+                                    Text(
+                                        text = "Oops! You didn't even start a chat yet.",
+                                        color = textColor,
+                                        fontSize = 13.sp,
+                                        fontFamily = monteSB,
+                                        modifier = Modifier.padding(top = 10.dp, bottom = 10.dp)
+                                    )
+
+                                    Spacer(modifier = Modifier.height(20.dp))
                                 }
-                            )
+                            }
                         }
                     }
                     item {
