@@ -64,7 +64,8 @@ import kotlinx.coroutines.launch
 fun SavedChat(
     viewModel: MainViewModel,
     navController: NavHostController,
-    photoUrl: String
+    photoUrl: String,
+    uid: String
 ) {
 
     var text by remember {
@@ -122,7 +123,8 @@ fun SavedChat(
                             ChatMessage(
                                 message = text.text,
                                 time = System.currentTimeMillis(),
-                                isUser = true
+                                isUser = true,
+                                uID = uid
                             )
                         )
                         viewModel.message.value = text.text

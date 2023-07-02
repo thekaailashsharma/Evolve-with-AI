@@ -12,7 +12,8 @@ import kotlinx.coroutines.launch
 
 class DatabaseRepo(private val chatDao: ChatDao, private val accountsDao: AccountsDao) {
     val allAccounts: Flow<List<Accounts>> = accountsDao.getAccount()
-    val allMessages: Flow<List<ChatMessage>> = chatDao.getAllChatMessages()
+    fun getType(id: String): Flow<Accounts> = accountsDao.getAccountById(uniqueId = id)
+    fun allMessages(id: String): Flow<List<ChatMessage>> = chatDao.getAllChatMessages(id = id)
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
     fun insertMessage(chatMessage: ChatMessage) {
         coroutineScope.launch {

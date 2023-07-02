@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.test.palmapi.database.DatabaseRepo
 import com.test.palmapi.database.accounts.Accounts
 import com.test.palmapi.database.chats.ChatMessage
+import com.test.palmapi.datastore.UserDatastore
 import com.test.palmapi.dto.ApiPrompt
 import com.test.palmapi.dto.PalmApi
 import com.test.palmapi.dto.Prompt
@@ -20,6 +21,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -34,17 +36,24 @@ class MainViewModel @Inject constructor(
     var apiData: MutableState<PalmApi?> = mutableStateOf(null)
     val listOfMessages: MutableState<MutableList<ChatMessage>> = mutableStateOf(mutableListOf())
     val message: MutableState<String> = mutableStateOf("")
-    val allMessages: Flow<List<ChatMessage>>
+    fun allMessages(uid: String): Flow<List<ChatMessage>> = dbRepository.allMessages(uid)
+    fun getType(uid: String) = dbRepository.getType(uid)
     val savedMessages: Flow<List<ChatMessage>>
     var isBlurred: MutableState<Boolean> = mutableStateOf(false)
     var savedName: MutableState<String> = mutableStateOf("")
+    var uid: MutableState<String> = mutableStateOf("")
     val allAccounts: Flow<List<Accounts>>
+    val datastore = UserDatastore(application.applicationContext)
 
     private val _state = MutableStateFlow(SignInState())
     val state = _state.asStateFlow()
 
     init {
-        allMessages = dbRepository.allMessages
+        viewModelScope.launch {
+            datastore.getUID.collectLatest {
+                uid.value = it
+            }
+        }
         savedMessages = dbRepository.getSavedMessage(savedName.value)
         allAccounts = dbRepository.allAccounts
     }
@@ -90,6 +99,7 @@ class MainViewModel @Inject constructor(
 
     fun getApiData() {
         viewModelScope.launch {
+            Log.i("Messages API Called Before", listOfMessages.value.toString())
             delay(1000)
             apiData = mutableStateOf(
                 repository.getApiData(
@@ -105,6 +115,7 @@ class MainViewModel @Inject constructor(
                     time = System.currentTimeMillis(),
                     message = apiData.value?.candidates?.get(0)?.output ?: "Something went wrong.",
                     isUser = false,
+                    uID = uid.value
                 )
             )
             Log.i("Messages API Called", listOfMessages.value.toString())

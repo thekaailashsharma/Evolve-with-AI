@@ -11,6 +11,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -46,6 +47,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
@@ -69,10 +71,13 @@ import com.test.palmapi.ui.theme.COLLAPSED_TOP_BAR_HEIGHT
 import com.test.palmapi.ui.theme.EXPANDED_TOP_BAR_HEIGHT
 import com.test.palmapi.ui.theme.appGradient
 import com.test.palmapi.ui.theme.buttonColor
+import com.test.palmapi.ui.theme.githubColors
+import com.test.palmapi.ui.theme.googleColors
 import com.test.palmapi.ui.theme.isDarkThemEnabled
 import com.test.palmapi.ui.theme.monteNormal
 import com.test.palmapi.ui.theme.monteSB
 import com.test.palmapi.ui.theme.textColor
+import com.test.palmapi.ui.theme.twitterColors
 import com.test.palmapi.ui.theme.ybc
 
 @Composable
@@ -142,6 +147,7 @@ fun NewChatTopBar(
 fun ExpandedTopBarHomeScreen(
     imageUrl: String,
     textValue: String,
+    type: String,
     onTextChange: (String) -> Unit,
     openDrawerClick: () -> Unit = {},
     closeDrawerClick: () -> Unit = {},
@@ -168,7 +174,27 @@ fun ExpandedTopBarHomeScreen(
                     imageUrl = imageUrl,
                     modifier = Modifier
                         .size(100.dp)
-                        .padding(3.dp)
+                        .border(
+                            brush = Brush.verticalGradient(
+                                colors = when (type) {
+                                    "google" -> {
+                                        googleColors
+                                    }
+
+                                    "twitter" -> {
+                                        twitterColors
+                                    }
+
+                                    "github" -> {
+                                        githubColors
+                                    }
+
+                                    else -> {
+                                        listOf(Color.White, Color.White)
+                                    }
+                                }
+                            ), shape = CircleShape, width = 1.dp
+                        )
                         .clip(CircleShape)
                         .clickable {
                             openDrawerClick()
@@ -247,6 +273,7 @@ fun ExpandedTopBarHomeScreen(
 
 @Composable
 fun CollapsedTopBarHomeScreen(
+    type: String,
     imageUrl: String,
     isCollapsed: Boolean,
     scroll: LazyListState
@@ -294,7 +321,27 @@ fun CollapsedTopBarHomeScreen(
                 imageUrl = imageUrl,
                 modifier = Modifier
                     .size(50.dp)
-                    .padding(3.dp)
+                    .border(
+                        brush = Brush.verticalGradient(
+                            colors = when (type) {
+                                "google" -> {
+                                    googleColors
+                                }
+
+                                "twitter" -> {
+                                    twitterColors
+                                }
+
+                                "github" -> {
+                                    githubColors
+                                }
+
+                                else -> {
+                                    listOf(Color.White, Color.White)
+                                }
+                            }
+                        ), shape = CircleShape, width = 1.dp
+                    )
                     .clip(CircleShape),
             )
 

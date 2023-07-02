@@ -21,6 +21,28 @@ val Pink40 = Color(0xFF7D5260)
 val COLLAPSED_TOP_BAR_HEIGHT = 80.dp
 val EXPANDED_TOP_BAR_HEIGHT = 360.dp
 
+val googleColors = listOf(
+    Color(0xFF4285F4),
+    Color(0xFFDB4437),
+    Color(0xFFF4B400),
+    Color(0xFF4285F4),
+    Color(0xFF0F9D58),
+    Color(0xFFDB4437),
+)
+
+val twitterColors = listOf(
+    Color(0xFF1DA1F2),
+    Color(0xFF1DA1F2),
+    Color(0xFF1DA1F2),
+)
+
+val githubColors = listOf(
+    Color(0xFFfafafa),
+    Color(0xFF333333),
+    Color(0xFFf5f5f5),
+    Color(0xFF333333),
+)
+
 val isDarkThemEnabled: Boolean
     @Composable
     get() = isSystemInDarkTheme()

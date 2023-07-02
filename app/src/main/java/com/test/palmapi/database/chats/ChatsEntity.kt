@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "chat_message")
 data class ChatMessage(
-    @PrimaryKey(autoGenerate = true)
+    @PrimaryKey(autoGenerate = false)
     val time: Long,
     @ColumnInfo(name = "message")
     val message: String?,
@@ -17,5 +17,7 @@ data class ChatMessage(
     @ColumnInfo(name = "isPined")
     val isPined: Boolean = false,
     @ColumnInfo(name = "id")
-    val id: Int = 0
+    val id: Int = 0,
+    @ColumnInfo(name = "uID")
+    val uID: String,
 )

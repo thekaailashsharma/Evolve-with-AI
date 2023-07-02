@@ -39,7 +39,9 @@ fun HomeScreen(
     viewModel: MainViewModel,
     photoUrl: String,
     name: String,
-    email: String
+    email: String,
+    type: String,
+    uid: String
 ) {
     val listState = rememberLazyListState()
     val isCollapsed: Boolean by remember {
@@ -54,7 +56,8 @@ fun HomeScreen(
             name,
             email,
             viewModel = viewModel,
-            navController = navHostController
+            navController = navHostController,
+            type = type,
         )
     }, drawerState = drawerState, gesturesEnabled = drawerState.isOpen) {
         Scaffold(
@@ -62,13 +65,14 @@ fun HomeScreen(
                 CollapsedTopBarHomeScreen(
                     imageUrl = photoUrl,
                     isCollapsed = isCollapsed,
-                    scroll = listState
+                    scroll = listState,
+                    type = type,
                 )
             },
         ) { padding ->
             println(padding)
             CompositionLocalProvider(LocalOverscrollConfiguration provides null) {
-                val result by viewModel.allMessages.collectAsState(initial = listOf())
+                val result by viewModel.allMessages(uid).collectAsState(initial = listOf())
                 LazyColumn(
                     modifier = Modifier
                         .padding(padding)
@@ -78,6 +82,7 @@ fun HomeScreen(
                 ) {
                     item {
                         ExpandedTopBarHomeScreen(
+                            type = type,
                             imageUrl = photoUrl,
                             textValue = "",
                             onTextChange = {},

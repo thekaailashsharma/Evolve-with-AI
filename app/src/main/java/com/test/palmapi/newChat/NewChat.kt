@@ -104,13 +104,14 @@ fun NewChat(
     email: String,
     name: String,
     photoUrl: String,
+    uid: String,
 ) {
     var text by remember {
         mutableStateOf(TextFieldValue(""))
     }
     val lazyListState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
-    val result by viewModel.allMessages.collectAsState(initial = listOf())
+    val result by viewModel.allMessages(uid).collectAsState(initial = listOf())
     LaunchedEffect(key1 = result) {
         try {
             if (result.isNotEmpty()) {
@@ -161,7 +162,8 @@ fun NewChat(
                             ChatMessage(
                                 message = text.text,
                                 time = System.currentTimeMillis(),
-                                isUser = true
+                                isUser = true,
+                                uID = uid,
                             )
                         )
                         viewModel.message.value = text.text

@@ -120,6 +120,7 @@ fun LoginScreen(navHostController: NavHostController, viewModel: MainViewModel) 
                 dataStore.saveEmail(googleAuthUiClient.getSignedInUser()?.email ?: "")
                 dataStore.saveName(googleAuthUiClient.getSignedInUser()?.username ?: "")
                 dataStore.savePfp(googleAuthUiClient.getSignedInUser()?.profilePictureUrl ?: "")
+                dataStore.saveUID(googleAuthUiClient.getSignedInUser()?.uniqueId ?: "")
             }
             addAccountToManager(
                 context,
@@ -158,6 +159,7 @@ fun LoginScreen(navHostController: NavHostController, viewModel: MainViewModel) 
                 dataStore.saveEmail(googleAuthUiClient.getSignedInUser()?.email ?: "")
                 dataStore.saveName(googleAuthUiClient.getSignedInUser()?.username ?: "")
                 dataStore.savePfp(googleAuthUiClient.getSignedInUser()?.profilePictureUrl ?: "")
+                dataStore.saveUID(googleAuthUiClient.getSignedInUser()?.uniqueId ?: "")
                 addAccountToManager(
                     context,
                     googleAuthUiClient.getSignedInUser()?.email ?: "",
@@ -194,6 +196,7 @@ fun LoginScreen(navHostController: NavHostController, viewModel: MainViewModel) 
                 dataStore.saveEmail(googleAuthUiClient.getSignedInUser()?.email ?: "")
                 dataStore.saveName(googleAuthUiClient.getSignedInUser()?.username ?: "")
                 dataStore.savePfp(googleAuthUiClient.getSignedInUser()?.profilePictureUrl ?: "")
+                dataStore.saveUID(googleAuthUiClient.getSignedInUser()?.uniqueId ?: "")
                 addAccountToManager(
                     context,
                     googleAuthUiClient.getSignedInUser()?.email ?: "",

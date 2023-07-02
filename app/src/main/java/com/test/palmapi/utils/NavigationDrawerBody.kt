@@ -3,6 +3,7 @@ package com.test.palmapi.utils
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -42,6 +43,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -58,10 +61,13 @@ import com.test.palmapi.login.ProfileImage
 import com.test.palmapi.ui.theme.CardColor
 import com.test.palmapi.ui.theme.appGradient
 import com.test.palmapi.ui.theme.buttonColor
+import com.test.palmapi.ui.theme.githubColors
+import com.test.palmapi.ui.theme.googleColors
 import com.test.palmapi.ui.theme.isDarkThemEnabled
 import com.test.palmapi.ui.theme.monteSB
 import com.test.palmapi.ui.theme.openDeviceThemeSettings
 import com.test.palmapi.ui.theme.textColor
+import com.test.palmapi.ui.theme.twitterColors
 import kotlinx.coroutines.launch
 import java.util.Locale
 
@@ -73,6 +79,7 @@ fun NavigationDrawer(
     displayName: String,
     email: String,
     viewModel: MainViewModel,
+    type: String,
     navController: NavHostController
 ) {
     val context = LocalContext.current
@@ -113,7 +120,27 @@ fun NavigationDrawer(
                         imageUrl = photoUrl,
                         modifier = Modifier
                             .size(100.dp)
-                            .padding(3.dp)
+                            .border(
+                                brush = Brush.verticalGradient(
+                                    colors = when (type) {
+                                        "google" -> {
+                                            googleColors
+                                        }
+
+                                        "twitter" -> {
+                                            twitterColors
+                                        }
+
+                                        "github" -> {
+                                            githubColors
+                                        }
+
+                                        else -> {
+                                            listOf(Color.White, Color.White)
+                                        }
+                                    }
+                                ), shape = CircleShape, width = 1.dp
+                            )
                             .clip(CircleShape),
                     )
                     Spacer(modifier = Modifier.height(10.dp))

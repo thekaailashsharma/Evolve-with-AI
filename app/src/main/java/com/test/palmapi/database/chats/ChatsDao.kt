@@ -15,8 +15,8 @@ interface ChatDao {
     @Query("DELETE FROM chat_message WHERE time = :time")
     suspend fun deleteChatMessage(time: Long)
 
-    @Query("SELECT * FROM chat_message where name = :name")
-    fun getAllChatMessages(name: String = "New Chat"): Flow<List<ChatMessage>>
+    @Query("SELECT * FROM chat_message where name = :name and uID = :id")
+    fun getAllChatMessages(name: String = "New Chat", id: String): Flow<List<ChatMessage>>
 
     @Query("SELECT * FROM chat_message where name = :name")
     fun getSavedMessages(name: String): Flow<List<ChatMessage>>
