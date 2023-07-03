@@ -57,12 +57,9 @@ Following latest Android Norms
   </a>
 </p>
 
-<h1 align="center">  📲✨Demo Video 🚀 </h1> <br>
-<p align="center">
-  <a href="https://www.linkedin.com/feed/update/urn:li:activity:7081408152709062656"/>
-    <img src="https://firebasestorage.googleapis.com/v0/b/palmapi-b548f.appspot.com/o/HEADER.png?alt=media&token=1ffb8e1b-42d9-4b8a-9634-2c86b5c598bc" alt="HiewAF9.md.png" border="0">
-  </a
-</p
+
+## 📽️ Demo Video
+[Demo Video](https://www.linkedin.com/feed/update/urn:li:activity:7081408152709062656/)
 
 ## 📦 Packages
 
