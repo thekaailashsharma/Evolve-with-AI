@@ -17,7 +17,7 @@ plugins {
     id("com.google.dagger.hilt.android") version "2.45" apply false
     id("com.google.devtools.ksp") version "1.8.10-1.0.9" apply false
     id("org.jmailen.kotlinter") version "3.13.0" apply false
-    id("com.android.library") version "8.2.0-alpha06" apply false
+    id("com.android.library") version "8.1.0" apply false
 }
 true // Needed to make the Suppress annotation work for the plugins block
 

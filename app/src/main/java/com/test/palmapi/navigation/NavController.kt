@@ -1,11 +1,14 @@
 package com.test.palmapi.navigation
 
+import android.content.Intent
 import android.util.Log
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -19,6 +22,7 @@ import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDeepLink
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.navDeepLink
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
@@ -32,13 +36,14 @@ import com.test.palmapi.mlkit.ModalCamera
 import com.test.palmapi.mlkit.barcode.ui.BarCodeOnly
 import com.test.palmapi.mlkit.textRecognition.ui.TextROnly
 import com.test.palmapi.newChat.NewChat
+import com.test.palmapi.prompts.PromptScreen
 import com.test.palmapi.savedChat.SavedChat
 import com.test.palmapi.services.OurServices
 import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun NavController() {
+fun NavController(dynamicLink: String) {
     val navController = rememberAnimatedNavController()
     val user by remember { mutableStateOf(Firebase.auth.currentUser) }
     user?.let {
@@ -83,12 +88,16 @@ fun NavController() {
             )
         }
 
-        setComposable(Screens.SavedChat.route) {
+        setComposable(
+            Screens.SavedChat.route,
+
+        ) {
+
             SavedChat(
                 viewModel = viewModel,
                 navController = navController,
                 photoUrl = pfp.value,
-                uid = uid.value
+                uid = uid.value,
             )
         }
 
@@ -119,6 +128,24 @@ fun NavController() {
         setComposable(Screens.TextROnly.route) {
             TextROnly()
         }
+
+        setComposable(Screens.PromptChat.route, deepLinks = listOf(
+            navDeepLink {
+                uriPattern = "palmapi.page.link"
+                action = Intent.ACTION_VIEW
+            }
+        )){
+            PromptScreen(
+                viewModel = viewModel,
+                navController = navController,
+                photoUrl = pfp.value,
+                uid = uid.value,
+                prompt = dynamicLink.substringAfter("contentt=").substringBefore("+emotion="),
+                emotion = dynamicLink.substringAfter("+emotion=")
+            )
+        }
+
+
 
     }
 

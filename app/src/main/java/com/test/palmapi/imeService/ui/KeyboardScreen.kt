@@ -24,6 +24,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -35,11 +36,13 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.test.palmapi.R
+import com.test.palmapi.datastore.UserDatastore
 import com.test.palmapi.imeService.IMEService
 import com.test.palmapi.imeService.callAPI
 import com.test.palmapi.ui.theme.CardColor
 import com.test.palmapi.ui.theme.appGradient
 import com.test.palmapi.ui.theme.textColor
+import kotlinx.coroutines.launch
 import java.util.regex.Pattern
 
 data class KeyMatrix(
@@ -146,6 +149,7 @@ fun KeyboardScreen() {
     val isAIAnimation = remember { mutableStateOf(false) }
     var text = remember { mutableStateOf("") }
     val ctx = LocalContext.current
+    val datastore = UserDatastore(ctx)
 
     Column(
         modifier = Modifier
@@ -187,6 +191,8 @@ fun KeyboardScreen() {
                         "\n$response",
                         response.length
                     )
+                    datastore.storeText(extractedText ?: "")
+
                 } else {
                     (ctx as IMEService).currentInputConnection.commitText(
                         "\nSomething went wrong!",
@@ -390,7 +396,8 @@ fun KeyboardKey(
     text: MutableState<String>,
     modifier: Modifier
 ) {
-
+    val datastore = UserDatastore(ctx)
+    val coroutineScope = rememberCoroutineScope()
     val interactionSource = remember { MutableInteractionSource() }
     val pressed = interactionSource.collectIsPressedAsState()
     Box(modifier = modifier.fillMaxHeight(), contentAlignment = Alignment.BottomCenter) {
@@ -405,14 +412,15 @@ fun KeyboardKey(
                         interactionSource = interactionSource,
                         indication = null
                     ) {
-
-
                         text.value += if (keyboardKey.lowercase() == "space") " " else keyboardKey
                         (ctx as IMEService).currentInputConnection.commitText(
                             if (keyboardKey.lowercase() == "space") " "
                             else keyboardKey,
                             keyboardKey.length,
                         )
+                        coroutineScope.launch {
+                            datastore.storeText(text.value)
+                        }
 
                     }
                 else

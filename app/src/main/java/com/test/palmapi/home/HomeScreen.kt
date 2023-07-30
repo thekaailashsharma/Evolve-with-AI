@@ -69,7 +69,7 @@ fun HomeScreen(
     name: String,
     email: String,
     type: String,
-    uid: String
+    uid: String,
 ) {
     val listState = rememberLazyListState()
     val isCollapsed: Boolean by remember {

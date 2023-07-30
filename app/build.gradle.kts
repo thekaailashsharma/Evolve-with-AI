@@ -110,6 +110,7 @@ dependencies {
 
     //Room
     implementation(libs.room.runtime)
+    implementation("com.google.firebase:firebase-dynamic-links-ktx:21.1.0")
     annotationProcessor(libs.room.compiler)
     ksp(libs.room.compiler)
     implementation(libs.room.ktx)
@@ -153,6 +154,12 @@ dependencies {
     implementation(libs.splitties.systemservices)
     implementation(libs.splitties.views)
     implementation(libs.androidx.appcompat)
+
+    //Firebase
+    implementation(libs.firebase.messaging.ktx)
+
+    //Work Manager
+    implementation("androidx.work:work-runtime-ktx:2.8.1")
 
     //Test Android
     testImplementation(libs.junit)

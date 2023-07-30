@@ -45,7 +45,6 @@ class DatabaseRepo(private val chatDao: ChatDao, private val accountsDao: Accoun
         }
     }
 
-
     fun getSavedMessage(name: String) = chatDao.getSavedMessages(name)
     fun getUniqueSaved() = chatDao.getUniqueSaved()
 
