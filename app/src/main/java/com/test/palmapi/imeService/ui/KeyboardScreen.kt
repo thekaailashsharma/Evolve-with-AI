@@ -69,6 +69,8 @@ import kotlinx.coroutines.launch
 import java.util.regex.Pattern
 import android.content.ClipData
 import android.content.ClipboardManager
+import androidx.compose.foundation.layout.offset
+import androidx.compose.runtime.DisposableEffect
 
 
 data class KeyMatrix(
@@ -179,9 +181,12 @@ fun KeyboardScreen() {
     val generatedText = remember { mutableStateOf<String?>(null) }
     val currentAction = remember { mutableStateOf<Action?>(null) }
     val currentActionText = remember { mutableStateOf<String?>(null) }
+    val clipboardText = remember { mutableStateOf<String?>(null) }
     val callAI = remember { mutableStateOf(false) }
     var text = remember { mutableStateOf("") }
     val ctx = LocalContext.current
+    val clipboardManager = ctx.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+    val clipData: ClipData? = clipboardManager.primaryClip
     val datastore = UserDatastore(ctx)
     val coroutineScope = rememberCoroutineScope()
 
@@ -189,6 +194,19 @@ fun KeyboardScreen() {
         if (generatedText.value != null) {
             delay(500)
             isGeneratedAnimation.value = false
+        }
+    }
+    DisposableEffect(ctx) {
+        val clipboardManager = ctx.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+
+        val listener = ClipboardManager.OnPrimaryClipChangedListener {
+            clipboardText.value = getClipboardText(ctx) ?: ""
+        }
+
+        clipboardManager.addPrimaryClipChangedListener(listener)
+
+        onDispose {
+            clipboardManager.removePrimaryClipChangedListener(listener)
         }
     }
 
@@ -220,14 +238,25 @@ fun KeyboardScreen() {
                         }
                     }
             )
-//            if (!callAI.value) {
-//                Icon(
-//                    painterResource(id = R.drawable.mic),
-//                    contentDescription = "",
-//                    tint = textColor,
-//                    modifier = Modifier.size(25.dp)
-//                )
-//            }
+            if (!callAI.value && clipboardText.value != null) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().offset(x = (-10).dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "${clipboardText.value?.take(10)}...",
+                        maxLines = 1,
+                        color = textColor,
+                        modifier = Modifier.clickable {
+                            text.value = clipboardText.value ?: ""
+                            (ctx as IMEService).currentInputConnection.commitText(
+                                "\n${text.value}",
+                                text.value.length
+                            )
+                        }
+                    )
+                }
+            }
 
             AnimatedVisibility(
                 visible = callAI.value,
@@ -278,7 +307,7 @@ fun KeyboardScreen() {
                                             generatedText.value =
                                                 callAPIv2(
                                                     action = action,
-                                                    text = getClipboardText(ctx) ?: text.value
+                                                    text = text.value
                                                 )
                                         }
                                     } else {
