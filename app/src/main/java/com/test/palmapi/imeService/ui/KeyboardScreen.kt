@@ -8,9 +8,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -21,23 +19,15 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -69,14 +59,17 @@ import com.test.palmapi.imeService.IMEService
 import com.test.palmapi.imeService.actions
 import com.test.palmapi.imeService.callAPI
 import com.test.palmapi.imeService.callAPIv2
+import com.test.palmapi.imeService.translateActions
 import com.test.palmapi.imeService.useActions
 import com.test.palmapi.ui.theme.CardColor
 import com.test.palmapi.ui.theme.appGradient
-import com.test.palmapi.ui.theme.buttonColor
 import com.test.palmapi.ui.theme.textColor
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.regex.Pattern
+import android.content.ClipData
+import android.content.ClipboardManager
+
 
 data class KeyMatrix(
     val key: String? = null,
@@ -182,8 +175,10 @@ fun KeyboardScreen() {
     val numericKeyBoard = remember { mutableStateOf(false) }
     val isAIAnimation = remember { mutableStateOf(false) }
     val isGeneratedAnimation = remember { mutableStateOf(false) }
+    val isTranslateVisible = remember { mutableStateOf(false) }
     val generatedText = remember { mutableStateOf<String?>(null) }
     val currentAction = remember { mutableStateOf<Action?>(null) }
+    val currentActionText = remember { mutableStateOf<String?>(null) }
     val callAI = remember { mutableStateOf(false) }
     var text = remember { mutableStateOf("") }
     val ctx = LocalContext.current
@@ -218,6 +213,8 @@ fun KeyboardScreen() {
                     .clickable {
                         callAI.value = !callAI.value
                         currentAction.value = null
+                        currentActionText.value = null
+                        isGeneratedAnimation.value = false
                         if (generatedText.value != null) {
                             generatedText.value = null
                         }
@@ -244,117 +241,63 @@ fun KeyboardScreen() {
                 LazyRow(contentPadding = PaddingValues(7.dp)) {
                     if (generatedText.value != null) {
                         items(useActions) { useAction ->
-                            Card(
-                                colors = CardDefaults.cardColors(
-                                    containerColor = CardColor
-                                ),
-                                shape = RoundedCornerShape(10.dp),
-                                modifier = Modifier.padding(7.dp)
-                            ) {
-                                Column(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    verticalArrangement = Arrangement.Center
-                                ) {
-                                    Text(
-                                        text = useAction.action,
-                                        color = textColor,
-                                        modifier = Modifier.clickable {
-                                            if (useAction.action == "Use text") {
-                                                val inputConnection = (ctx as IMEService).currentInputConnection
-                                                inputConnection.performContextMenuAction(android.R.id.selectAll)
-                                                inputConnection.commitText("", 1)
-                                                (ctx as IMEService).currentInputConnection.commitText(
-                                                    "\n${generatedText.value}",
-                                                    generatedText.value?.length ?: 0
-                                                )
-                                            } else if (useAction.action == "Regenerate") {
-                                                coroutineScope.launch {
-                                                    isGeneratedAnimation.value = true
-                                                    currentAction.value = currentAction.value
-                                                    generatedText.value =
-                                                        currentAction.value?.let {
-                                                            callAPIv2(
-                                                                action = it,
-                                                                text = text.value
-                                                            )
-                                                        }
-                                                }
-                                            }
-                                        }
+                            RepeatedActionCard(action = useAction) {
+                                if (useAction.name == "Use text") {
+                                    val inputConnection =
+                                        (ctx as IMEService).currentInputConnection
+                                    inputConnection.performContextMenuAction(android.R.id.selectAll)
+                                    inputConnection.commitText("", 1)
+                                    (ctx as IMEService).currentInputConnection.commitText(
+                                        "\n${generatedText.value}",
+                                        generatedText.value?.length ?: 0
                                     )
-//                                if (action.subActions != null) {
-//                                    Spacer(modifier = Modifier.height(4.dp))
-//                                    LazyRow(
-//                                        contentPadding = PaddingValues(4.dp),
-//                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-//                                    ) {
-//                                        items(action.subActions) { subAction ->
-//                                            Card(
-//                                                colors = CardDefaults.cardColors(
-//                                                    containerColor = CardColor
-//                                                ),
-//                                                shape = RoundedCornerShape(10.dp)
-//                                            ) {
-//                                                Text(
-//                                                    text = subAction.name,
-//                                                    color = textColor,
-//                                                    modifier = Modifier.padding(4.dp),
-//                                                )
-//                                            }
-//                                        }
-//                                    }
-//                                }
+                                } else if (useAction.name == "Regenerate") {
+                                    coroutineScope.launch {
+                                        isGeneratedAnimation.value = true
+                                        currentAction.value = currentAction.value
+                                        currentActionText.value = text.value
+                                        generatedText.value =
+                                            currentAction.value?.let {
+                                                callAPIv2(
+                                                    action = it,
+                                                    text = currentActionText.value ?: ""
+                                                )
+                                            }
+                                    }
                                 }
                             }
                         }
-
                     } else {
-                        items(actions) { action ->
-                            Card(
-                                colors = CardDefaults.cardColors(
-                                    containerColor = CardColor
-                                ),
-                                shape = RoundedCornerShape(10.dp),
-                                modifier = Modifier.padding(10.dp)
-                            ) {
-                                Column(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    verticalArrangement = Arrangement.Center
-                                ) {
-                                    Text(
-                                        text = action.name,
-                                        color = textColor,
-                                        modifier = Modifier.clickable {
-                                            coroutineScope.launch {
-                                                isGeneratedAnimation.value = true
-                                                currentAction.value = action
-                                                generatedText.value =
-                                                    callAPIv2(action = action, text = text.value)
-                                            }
+                        if (!isTranslateVisible.value) {
+                            items(actions) { action ->
+                                RepeatedActionCard(action = action) {
+                                    if (action.name != "Translate (Beta)") {
+                                        coroutineScope.launch {
+                                            isGeneratedAnimation.value = true
+                                            currentAction.value = action
+                                            generatedText.value =
+                                                callAPIv2(
+                                                    action = action,
+                                                    text = getClipboardText(ctx) ?: text.value
+                                                )
                                         }
-                                    )
-//                                if (action.subActions != null) {
-//                                    Spacer(modifier = Modifier.height(4.dp))
-//                                    LazyRow(
-//                                        contentPadding = PaddingValues(4.dp),
-//                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-//                                    ) {
-//                                        items(action.subActions) { subAction ->
-//                                            Card(
-//                                                colors = CardDefaults.cardColors(
-//                                                    containerColor = CardColor
-//                                                ),
-//                                                shape = RoundedCornerShape(10.dp)
-//                                            ) {
-//                                                Text(
-//                                                    text = subAction.name,
-//                                                    color = textColor,
-//                                                    modifier = Modifier.padding(4.dp),
-//                                                )
-//                                            }
-//                                        }
-//                                    }
-//                                }
+                                    } else {
+                                        isTranslateVisible.value = true
+                                    }
+                                }
+                            }
+                        } else {
+                            items(translateActions) { action ->
+                                RepeatedActionCard(action = action) {
+                                    coroutineScope.launch {
+                                        isGeneratedAnimation.value = true
+                                        currentAction.value = action
+                                        generatedText.value =
+                                            callAPIv2(
+                                                action = action,
+                                                text = currentActionText.value ?: ""
+                                            )
+                                    }
                                 }
                             }
                         }
@@ -478,15 +421,16 @@ fun KeyboardScreen() {
                     }
                 }
             } else {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(232.dp)
-                            .verticalScroll(rememberScrollState())
-                    ) {
-                        Text(text = generatedText.value ?: "", color = textColor)
-                    }
+                Column(
+                    modifier = Modifier
+                        .padding(horizontal = 10.dp, vertical = 15.dp)
+                        .fillMaxWidth()
+                        .height(232.dp)
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    Text(text = generatedText.value ?: "", color = textColor)
                 }
+            }
 
         }
     }
@@ -705,3 +649,16 @@ fun extractTextInsideParentheses(inputText: String): String? {
 
     return result
 }
+
+fun getClipboardText(context: Context): String? {
+    val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+    val clipData: ClipData? = clipboardManager.primaryClip
+
+    if (clipData != null && clipData.itemCount > 0) {
+        val item = clipData.getItemAt(0)
+        return item.text?.toString()
+    }
+
+    return null
+}
+

@@ -1,6 +1,7 @@
 package com.test.palmapi.imeService
 
 import android.content.Context
+import android.util.Log
 import com.test.palmapi.BuildConfig
 import com.test.palmapi.dto.ApiPrompt
 import com.test.palmapi.dto.PalmApi
@@ -27,45 +28,77 @@ data class Action(
     val prompt: String,
 )
 
-data class UseAction(
-    val action: String,
-    val onClick: (Context, Action, String) -> Unit
+val useActions = listOf(
+    Action("Use text", ""),
+    Action("Regenerate", "")
 )
 
-val useActions = listOf(
-    UseAction("Use text") { ctx: Context, _: Action, response: String ->
-        (ctx as IMEService).currentInputConnection.commitText(
-            "\n$response",
-            response.length
-        )
-    },
-    UseAction("Regenerate") { _: Context, action: Action, response: String ->
-        GlobalScope.launch(Dispatchers.IO) {
-            callAPIv2(action = action, text = response)
-        }
-    }
+val translateActions = listOf(
+    Action(
+        "Hindi",
+        "You are an expert translator" +
+                "Translate the given text to Hindi: "
+    ),
+    Action(
+        "Marathi",
+        "You are an expert translator" +
+                "Translate the given text to Marathi: "
+    ),
+    Action(
+        "Gujarati",
+        "You are an expert translator" +
+                "Translate the given text to Gujarati: "
+    ),
+    Action(
+        "Kannada",
+        "You are an expert translator" +
+                "Translate the given text to Kannada: "
+    ),
+    Action(
+        "Tamil",
+        "You are an expert translator" +
+                "Translate the given text to Tamil: "
+    ),
+    Action(
+        "French",
+        "You are an expert translator" +
+                "Translate the given text to French: "
+    ),
+    Action(
+        "Spanish",
+        "You are an expert translator" +
+                "Translate the given text to Spanish: "
+    ),
 )
 
 val actions = listOf(
     Action(
         "Summarize",
-        "You are an expert summarizer. " +
-                "Summarize the given text: "
+        "Summarize this paragraph and detail some relevant context.\n" +
+                "\n" +
+                "Text: "
+    ),
+    Action(
+        "Generate",
+        "You are an expert content curator." +
+                "Generate content based on user input:  "
+
+    ),
+    Action(
+        "Provide",
+        "Provide relevant information or resources on the following input: "
+
     ),
     Action(
         "Recommend",
         "Provide recommendations based on user input :"
     ),
     Action(
-        "Generate",
-        "Generate content based on user input:  "
+        "Translate (Beta)",
+        "You are an expert translator" +
+                "Translate the given text to "
 
     ),
-    Action(
-        "Provide",
-        "Provide relevant information or resources on the following input: {}"
-
-    )
 )
 
 
@@ -113,10 +146,11 @@ suspend fun callAPIv2(action: Action, text: String): String? = suspendCoroutine 
     GlobalScope.launch(Dispatchers.IO) {
         try {
             val response = httpClient.post<PalmApi> {
+                Log.i("Text going is ", "${action.prompt} + {$text} ")
                 url(apiEndpoint)
                 body = ApiPrompt(
                     prompt = Prompt(
-                        text = "${action.prompt} + $text"
+                        text = "${action.prompt} + {$text} "
                     )
                 )
                 headers {
