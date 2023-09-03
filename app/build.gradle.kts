@@ -161,6 +161,9 @@ dependencies {
     //Work Manager
     implementation("androidx.work:work-runtime-ktx:2.8.1")
 
+    // Markdown Renderrer
+    implementation("com.github.jeziellago:compose-markdown:0.2.6")
+
     //Test Android
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)

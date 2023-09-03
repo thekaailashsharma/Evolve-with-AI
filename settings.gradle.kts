@@ -4,6 +4,7 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
         maven(url = "dl.bintray.com/jetbrains/markdown")
+        maven(url = "https://jitpack.io")
     }
 }
 dependencyResolutionManagement {
@@ -12,6 +13,7 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven(url = "dl.bintray.com/jetbrains/markdown")
+        maven(url = "https://jitpack.io")
     }
 }
 

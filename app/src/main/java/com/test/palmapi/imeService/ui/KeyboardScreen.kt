@@ -3,6 +3,14 @@ package com.test.palmapi.imeService.ui
 import android.content.Context
 import android.util.Log
 import android.view.KeyEvent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -11,17 +19,32 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -29,19 +52,29 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.test.palmapi.R
 import com.test.palmapi.datastore.UserDatastore
+import com.test.palmapi.imeService.Action
 import com.test.palmapi.imeService.IMEService
+import com.test.palmapi.imeService.actions
 import com.test.palmapi.imeService.callAPI
+import com.test.palmapi.imeService.callAPIv2
+import com.test.palmapi.imeService.useActions
 import com.test.palmapi.ui.theme.CardColor
 import com.test.palmapi.ui.theme.appGradient
+import com.test.palmapi.ui.theme.buttonColor
 import com.test.palmapi.ui.theme.textColor
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.regex.Pattern
 
@@ -50,6 +83,7 @@ data class KeyMatrix(
     val icon: Int? = null,
     val onClick: () -> Unit = {}
 )
+
 
 @Composable
 fun KeyboardScreen() {
@@ -147,9 +181,21 @@ fun KeyboardScreen() {
     val capsLockState = remember { mutableStateOf(false) }
     val numericKeyBoard = remember { mutableStateOf(false) }
     val isAIAnimation = remember { mutableStateOf(false) }
+    val isGeneratedAnimation = remember { mutableStateOf(false) }
+    val generatedText = remember { mutableStateOf<String?>(null) }
+    val currentAction = remember { mutableStateOf<Action?>(null) }
+    val callAI = remember { mutableStateOf(false) }
     var text = remember { mutableStateOf("") }
     val ctx = LocalContext.current
     val datastore = UserDatastore(ctx)
+    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(key1 = generatedText.value) {
+        if (generatedText.value != null) {
+            delay(500)
+            isGeneratedAnimation.value = false
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -163,109 +209,289 @@ fun KeyboardScreen() {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-
             Icon(
                 painterResource(id = R.drawable.appicon),
                 contentDescription = "",
                 tint = Color.Unspecified,
                 modifier = Modifier
                     .size(30.dp)
+                    .clickable {
+                        callAI.value = !callAI.value
+                        currentAction.value = null
+                        if (generatedText.value != null) {
+                            generatedText.value = null
+                        }
+                    }
             )
-            Icon(
-                painterResource(id = R.drawable.mic),
-                contentDescription = "",
-                tint = textColor,
-                modifier = Modifier.size(25.dp)
-            )
+//            if (!callAI.value) {
+//                Icon(
+//                    painterResource(id = R.drawable.mic),
+//                    contentDescription = "",
+//                    tint = textColor,
+//                    modifier = Modifier.size(25.dp)
+//                )
+//            }
+
+            AnimatedVisibility(
+                visible = callAI.value,
+                enter = slideInHorizontally(tween(300), initialOffsetX = {
+                    it
+                }) + fadeIn(),
+                exit = slideOutHorizontally(tween(300), targetOffsetX = {
+                    it
+                }) + fadeOut()
+            ) {
+                LazyRow(contentPadding = PaddingValues(7.dp)) {
+                    if (generatedText.value != null) {
+                        items(useActions) { useAction ->
+                            Card(
+                                colors = CardDefaults.cardColors(
+                                    containerColor = CardColor
+                                ),
+                                shape = RoundedCornerShape(10.dp),
+                                modifier = Modifier.padding(7.dp)
+                            ) {
+                                Column(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalArrangement = Arrangement.Center
+                                ) {
+                                    Text(
+                                        text = useAction.action,
+                                        color = textColor,
+                                        modifier = Modifier.clickable {
+                                            if (useAction.action == "Use text") {
+                                                val inputConnection = (ctx as IMEService).currentInputConnection
+                                                inputConnection.performContextMenuAction(android.R.id.selectAll)
+                                                inputConnection.commitText("", 1)
+                                                (ctx as IMEService).currentInputConnection.commitText(
+                                                    "\n${generatedText.value}",
+                                                    generatedText.value?.length ?: 0
+                                                )
+                                            } else if (useAction.action == "Regenerate") {
+                                                coroutineScope.launch {
+                                                    isGeneratedAnimation.value = true
+                                                    currentAction.value = currentAction.value
+                                                    generatedText.value =
+                                                        currentAction.value?.let {
+                                                            callAPIv2(
+                                                                action = it,
+                                                                text = text.value
+                                                            )
+                                                        }
+                                                }
+                                            }
+                                        }
+                                    )
+//                                if (action.subActions != null) {
+//                                    Spacer(modifier = Modifier.height(4.dp))
+//                                    LazyRow(
+//                                        contentPadding = PaddingValues(4.dp),
+//                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+//                                    ) {
+//                                        items(action.subActions) { subAction ->
+//                                            Card(
+//                                                colors = CardDefaults.cardColors(
+//                                                    containerColor = CardColor
+//                                                ),
+//                                                shape = RoundedCornerShape(10.dp)
+//                                            ) {
+//                                                Text(
+//                                                    text = subAction.name,
+//                                                    color = textColor,
+//                                                    modifier = Modifier.padding(4.dp),
+//                                                )
+//                                            }
+//                                        }
+//                                    }
+//                                }
+                                }
+                            }
+                        }
+
+                    } else {
+                        items(actions) { action ->
+                            Card(
+                                colors = CardDefaults.cardColors(
+                                    containerColor = CardColor
+                                ),
+                                shape = RoundedCornerShape(10.dp),
+                                modifier = Modifier.padding(10.dp)
+                            ) {
+                                Column(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalArrangement = Arrangement.Center
+                                ) {
+                                    Text(
+                                        text = action.name,
+                                        color = textColor,
+                                        modifier = Modifier.clickable {
+                                            coroutineScope.launch {
+                                                isGeneratedAnimation.value = true
+                                                currentAction.value = action
+                                                generatedText.value =
+                                                    callAPIv2(action = action, text = text.value)
+                                            }
+                                        }
+                                    )
+//                                if (action.subActions != null) {
+//                                    Spacer(modifier = Modifier.height(4.dp))
+//                                    LazyRow(
+//                                        contentPadding = PaddingValues(4.dp),
+//                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+//                                    ) {
+//                                        items(action.subActions) { subAction ->
+//                                            Card(
+//                                                colors = CardDefaults.cardColors(
+//                                                    containerColor = CardColor
+//                                                ),
+//                                                shape = RoundedCornerShape(10.dp)
+//                                            ) {
+//                                                Text(
+//                                                    text = subAction.name,
+//                                                    color = textColor,
+//                                                    modifier = Modifier.padding(4.dp),
+//                                                )
+//                                            }
+//                                        }
+//                                    }
+//                                }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
         Divider(color = textColor, thickness = 1.dp)
-        if (checkAICall(text.value)) {
-            Log.i("KeyboardAPIBefore", text.value)
-            val extractedText = extractTextInsideParentheses(text.value)
-            Log.i("KeyboardAPIAfter", extractedText ?: "null")
-            LaunchedEffect(Unit) {
-                val response = callAPI(extractedText ?: "")
-                Log.i("KeyboardAPI", response.toString())
-                if (response != null) {
-                    (ctx as IMEService).currentInputConnection.commitText(
-                        "\n$response",
-                        response.length
+        AnimatedVisibility(
+            visible = isGeneratedAnimation.value,
+            enter = fadeIn(tween(300)),
+            exit = fadeOut(tween(300))
+        ) {
+            FixedHeightBox(modifier = Modifier.fillMaxWidth(), height = 232.dp) {
+                Column(
+                    modifier = Modifier
+                        .padding(top = 20.dp)
+                        .fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    val currenanim2 by rememberLottieComposition(
+                        spec = LottieCompositionSpec.Asset("ai.json")
                     )
-                    datastore.storeText(extractedText ?: "")
-
-                } else {
-                    (ctx as IMEService).currentInputConnection.commitText(
-                        "\nSomething went wrong!",
-                        20
+                    LottieAnimation(
+                        composition = currenanim2,
+                        iterations = Int.MAX_VALUE,
+                        contentScale = ContentScale.Crop,
+                        speed = 0.75f,
+                        modifier = Modifier
+                            .size(150.dp)
                     )
                 }
-                text.value = ""
-                isAIAnimation.value = true
             }
         }
-        if (!numericKeyBoard.value) {
-            lowerKeyMatrix.forEach { row ->
-                FixedHeightBox(modifier = Modifier.fillMaxWidth(), height = 58.dp) {
-                    Row(Modifier) {
-                        row.forEach { key ->
-                            if (key.icon != null) {
-                                IconKey(
-                                    ctx,
-                                    keyboardKey = key.icon,
-                                    capsLockState = capsLockState,
-                                    isAICalled = isAIAnimation,
-                                    text = text,
-                                    modifier = Modifier.weight(1f)
-                                )
-                            } else {
-                                KeyboardKey(
-                                    ctx,
-                                    keyboardKey = (if (capsLockState.value)
-                                        key.key?.uppercase() else key.key).toString(),
-                                    capsLockState = capsLockState,
-                                    numericKeyBoardState = numericKeyBoard,
-                                    isAICalled = isAIAnimation,
-                                    text = text,
-                                    modifier = Modifier.weight(1f)
-                                )
+        if (!isGeneratedAnimation.value) {
+            if (checkAICall(text.value)) {
+                Log.i("KeyboardAPIBefore", text.value)
+                val extractedText = extractTextInsideParentheses(text.value)
+                Log.i("KeyboardAPIAfter", extractedText ?: "null")
+                LaunchedEffect(Unit) {
+                    val response = callAPI(extractedText ?: "")
+                    Log.i("KeyboardAPI", response.toString())
+                    if (response != null) {
+                        (ctx as IMEService).currentInputConnection.commitText(
+                            "\n$response",
+                            response.length
+                        )
+                        datastore.storeText(extractedText ?: "")
+
+                    } else {
+                        (ctx as IMEService).currentInputConnection.commitText(
+                            "\nSomething went wrong!",
+                            20
+                        )
+                    }
+                    text.value = ""
+                    isAIAnimation.value = true
+                }
+            }
+            if (generatedText.value == null) {
+                if (!numericKeyBoard.value) {
+                    lowerKeyMatrix.forEach { row ->
+                        FixedHeightBox(modifier = Modifier.fillMaxWidth(), height = 58.dp) {
+                            Row(Modifier) {
+                                row.forEach { key ->
+                                    if (key.icon != null) {
+                                        IconKey(
+                                            ctx,
+                                            keyboardKey = key.icon,
+                                            capsLockState = capsLockState,
+                                            isAICalled = isAIAnimation,
+                                            text = text,
+                                            modifier = Modifier.weight(1f)
+                                        )
+                                    } else {
+                                        KeyboardKey(
+                                            ctx,
+                                            keyboardKey = (if (capsLockState.value)
+                                                key.key?.uppercase() else key.key).toString(),
+                                            capsLockState = capsLockState,
+                                            numericKeyBoardState = numericKeyBoard,
+                                            isAICalled = isAIAnimation,
+                                            text = text,
+                                            modifier = Modifier.weight(1f)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    numericKeyMatrix.forEach { row ->
+                        FixedHeightBox(modifier = Modifier.fillMaxWidth(), height = 56.dp) {
+                            Row(Modifier) {
+                                row.forEach { key ->
+                                    if (key.icon != null) {
+                                        IconKey(
+                                            ctx,
+                                            keyboardKey = key.icon,
+                                            capsLockState = capsLockState,
+                                            isAICalled = isAIAnimation,
+                                            text = text,
+                                            modifier = Modifier.weight(1f)
+                                        )
+                                    } else {
+                                        KeyboardKey(
+                                            ctx,
+                                            keyboardKey = (if (capsLockState.value)
+                                                key.key?.uppercase() else key.key).toString(),
+                                            capsLockState = capsLockState,
+                                            numericKeyBoardState = numericKeyBoard,
+                                            isAICalled = isAIAnimation,
+                                            text = text,
+                                            modifier = Modifier.weight(1f)
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
                 }
-            }
-        } else {
-            numericKeyMatrix.forEach { row ->
-                FixedHeightBox(modifier = Modifier.fillMaxWidth(), height = 56.dp) {
-                    Row(Modifier) {
-                        row.forEach { key ->
-                            if (key.icon != null) {
-                                IconKey(
-                                    ctx,
-                                    keyboardKey = key.icon,
-                                    capsLockState = capsLockState,
-                                    isAICalled = isAIAnimation,
-                                    text = text,
-                                    modifier = Modifier.weight(1f)
-                                )
-                            } else {
-                                KeyboardKey(
-                                    ctx,
-                                    keyboardKey = (if (capsLockState.value)
-                                        key.key?.uppercase() else key.key).toString(),
-                                    capsLockState = capsLockState,
-                                    numericKeyBoardState = numericKeyBoard,
-                                    isAICalled = isAIAnimation,
-                                    text = text,
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
-                        }
+            } else {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(232.dp)
+                            .verticalScroll(rememberScrollState())
+                    ) {
+                        Text(text = generatedText.value ?: "", color = textColor)
                     }
                 }
-            }
+
         }
     }
 }
+
 
 @Composable
 fun FixedHeightBox(modifier: Modifier, height: Dp, content: @Composable () -> Unit) {
