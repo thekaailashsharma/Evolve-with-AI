@@ -343,7 +343,10 @@ fun ChooseThemesCard(
                     .fillMaxWidth()
                     .padding(horizontal = 5.dp),
                 onClick = {
-
+                    isAnimationVisible.value = true
+                    coroutineScope.launch {
+                        dataStore.saveTheme(themeMode.name)
+                    }
                 },
                 shape = RoundedCornerShape(10.dp)
             ) {
