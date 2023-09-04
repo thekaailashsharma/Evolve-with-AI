@@ -96,8 +96,6 @@ dependencies {
     //ViewModel Compose
     implementation(libs.viewmodel.compose)
 
-    //Navigation Compose
-    implementation(libs.accompanist.navigation)
 
     // Material Icons Extended
     implementation(libs.material.icons.extended)
@@ -111,6 +109,8 @@ dependencies {
     //Room
     implementation(libs.room.runtime)
     implementation("com.google.firebase:firebase-dynamic-links-ktx:21.1.0")
+    implementation(platform(libs.compose.bom))
+    androidTestImplementation(platform(libs.compose.bom))
     annotationProcessor(libs.room.compiler)
     ksp(libs.room.compiler)
     implementation(libs.room.ktx)
@@ -163,6 +163,9 @@ dependencies {
 
     // Markdown Renderrer
     implementation("com.github.jeziellago:compose-markdown:0.2.6")
+
+    //Navigation Compose
+    implementation("androidx.navigation:navigation-compose:2.7.0-alpha01")
 
     //Test Android
     testImplementation(libs.junit)

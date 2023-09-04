@@ -7,6 +7,8 @@ import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,10 +24,10 @@ import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDeepLink
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navDeepLink
-import com.google.accompanist.navigation.animation.AnimatedNavHost
-import com.google.accompanist.navigation.animation.composable
-import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.test.palmapi.MainViewModel
@@ -44,7 +46,7 @@ import kotlinx.coroutines.flow.collectLatest
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun NavController(dynamicLink: String) {
-    val navController = rememberAnimatedNavController()
+    val navController = rememberNavController()
     val user by remember { mutableStateOf(Firebase.auth.currentUser) }
     user?.let {
         for (profile in it.providerData) {
@@ -69,15 +71,39 @@ fun NavController(dynamicLink: String) {
         }
     }
 
-    AnimatedNavHost(
+    NavHost(
         navController = navController,
-//        startDestination = Screens.OurServices.route
-        startDestination = if (user != null) Screens.Home.route else Screens.Login.route
-    ) {
+        startDestination = if (user != null) Screens.Home.route else Screens.Login.route,
+        enterTransition = {
+            slideInHorizontally(
+                initialOffsetX = { it },
+                animationSpec = tween(300),
+            )
+        },
+        exitTransition = {
+            slideOutHorizontally(
+                targetOffsetX = { -it },
+                animationSpec = tween(300),
+            )
+        },
+        popEnterTransition = {
+            slideInHorizontally(
+                initialOffsetX = { -it },
+                animationSpec = tween(300),
+            )
+        },
+        popExitTransition = {
+            slideOutHorizontally(
+                targetOffsetX = { it },
+                animationSpec = tween(300),
+            )
+        },
+
+        ) {
         composable(Screens.Login.route) {
             LoginScreen(navHostController = navController, viewModel = viewModel)
         }
-        setComposable(Screens.NewChat.route) {
+        composable(Screens.NewChat.route) {
             NewChat(
                 navHostController = navController,
                 photoUrl = pfp.value,
@@ -88,10 +114,10 @@ fun NavController(dynamicLink: String) {
             )
         }
 
-        setComposable(
+        composable(
             Screens.SavedChat.route,
 
-        ) {
+            ) {
 
             SavedChat(
                 viewModel = viewModel,
@@ -101,7 +127,7 @@ fun NavController(dynamicLink: String) {
             )
         }
 
-        setComposable(Screens.Home.route) {
+        composable(Screens.Home.route) {
             HomeScreen(
                 viewModel = viewModel,
                 photoUrl = pfp.value,
@@ -113,28 +139,28 @@ fun NavController(dynamicLink: String) {
             )
         }
 
-        setComposable(Screens.ModalCamera.route) {
+        composable(Screens.ModalCamera.route) {
             ModalCamera()
         }
 
-        setComposable(Screens.OurServices.route) {
+        composable(Screens.OurServices.route) {
             OurServices(navController = navController)
         }
 
-        setComposable(Screens.BarCodeOnly.route) {
+        composable(Screens.BarCodeOnly.route) {
             BarCodeOnly()
         }
 
-        setComposable(Screens.TextROnly.route) {
+        composable(Screens.TextROnly.route) {
             TextROnly()
         }
 
-        setComposable(Screens.PromptChat.route, deepLinks = listOf(
+        composable(Screens.PromptChat.route, deepLinks = listOf(
             navDeepLink {
                 uriPattern = "palmapi.page.link"
                 action = Intent.ACTION_VIEW
             }
-        )){
+        )) {
             PromptScreen(
                 viewModel = viewModel,
                 navController = navController,
@@ -144,40 +170,8 @@ fun NavController(dynamicLink: String) {
                 emotion = dynamicLink.substringAfter("+emotion=")
             )
         }
-
-
-
     }
 
+
 }
 
-@OptIn(ExperimentalAnimationApi::class)
-fun NavGraphBuilder.setComposable(
-    route: String,
-    arguments: List<NamedNavArgument> = emptyList(),
-    deepLinks: List<NavDeepLink> = emptyList(),
-    content: @Composable AnimatedVisibilityScope.(NavBackStackEntry) -> Unit
-) {
-    return composable(
-        route = route,
-        arguments = arguments,
-        deepLinks = deepLinks,
-        enterTransition = {
-            slideIntoContainer(
-                AnimatedContentScope.SlideDirection.Left, animationSpec = tween(300)
-            )
-        },
-        exitTransition = {
-            fadeOut(animationSpec = tween(300))
-        },
-        popEnterTransition = {
-            slideIntoContainer(
-                AnimatedContentScope.SlideDirection.Right, animationSpec = tween(300)
-            )
-        },
-        popExitTransition = {
-            fadeOut(animationSpec = tween(300))
-        },
-        content = content
-    )
-}
