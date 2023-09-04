@@ -1,7 +1,6 @@
 package com.test.palmapi.utils
 
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -52,16 +51,16 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.test.palmapi.MainViewModel
 import com.test.palmapi.R
+import com.test.palmapi.datastore.UserDatastore
 import com.test.palmapi.login.ProfileImage
 import com.test.palmapi.ui.theme.CardColor
+import com.test.palmapi.ui.theme.ThemeMode
 import com.test.palmapi.ui.theme.appGradient
-import com.test.palmapi.ui.theme.buttonColor
 import com.test.palmapi.ui.theme.githubColors
 import com.test.palmapi.ui.theme.googleColors
 import com.test.palmapi.ui.theme.isDarkThemEnabled
 import com.test.palmapi.ui.theme.monteBold
 import com.test.palmapi.ui.theme.monteSB
-import com.test.palmapi.ui.theme.openDeviceThemeSettings
 import com.test.palmapi.ui.theme.textColor
 import com.test.palmapi.ui.theme.twitterColors
 import kotlinx.coroutines.launch
@@ -202,21 +201,25 @@ fun NavigationDrawer(
                 verticalArrangement = Arrangement.Bottom,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                val context = LocalContext.current
+                val coroutineScope = rememberCoroutineScope()
+                val datastore = UserDatastore(context)
 
                 SwitchWithLabel(
                     state = isDarkThemEnabled,
                     onStateChange = {
-                        openDeviceThemeSettings(context)
-                        Toast.makeText(
-                            context,
-                            "Change System theme to change the app theme",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        coroutineScope.launch {
+                            datastore.saveTheme(ThemeMode.AquaBliss.name)
+                        }
+//                        openDeviceThemeSettings(context)
+//                        Toast.makeText(
+//                            context,
+//                            "Change System theme to change the app theme",
+//                            Toast.LENGTH_SHORT
+//                        ).show()
 
                     }
                 )
-
-
             }
         }
     }
@@ -230,7 +233,7 @@ private fun SwitchWithLabel(
     val interactionSource = remember { MutableInteractionSource() }
     Card(
         colors = CardDefaults.cardColors(
-            containerColor = buttonColor,
+            containerColor = CardColor,
         ),
         shape = RoundedCornerShape(30.dp),
     ) {

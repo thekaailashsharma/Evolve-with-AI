@@ -8,9 +8,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Text
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -21,8 +22,6 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.test.palmapi.ui.theme.CardColor
-import com.test.palmapi.ui.theme.textColor
 
 @Composable
 fun BottomBar(navController: NavController) {
@@ -32,14 +31,16 @@ fun BottomBar(navController: NavController) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 0.dp, end = 0.dp),
-        colors = CardDefaults.cardColors(CardColor),
+        colors = CardDefaults.cardColors(
+            MaterialTheme.colorScheme.onSecondary
+        ),
         elevation = CardDefaults.cardElevation(5.dp),
         shape = RoundedCornerShape(0.dp)
     ) {
         NavigationBar(
             modifier = Modifier
                 .height(80.dp),
-            containerColor = CardColor,
+            containerColor = MaterialTheme.colorScheme.primary,
             tonalElevation = 0.dp,
         ) {
             items.forEach {
@@ -55,14 +56,6 @@ fun BottomBar(navController: NavController) {
                             tint = Color.Unspecified
                         )
                     },
-                    label = {
-                        it.title?.let {
-                            Text(
-                                text = it,
-                                color = if (isYellow) Color.Yellow else textColor
-                            )
-                        }
-                    },
                     selected = isYellow,
                     onClick = {
                         it.route?.let { it1 ->
@@ -74,7 +67,10 @@ fun BottomBar(navController: NavController) {
                                 restoreState = true
                             }
                         }
-                    }
+                    },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = MaterialTheme.colorScheme.secondary
+                    )
                 )
             }
         }

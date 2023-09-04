@@ -7,4 +7,5 @@
         We protect your privacy and do not store any data.
         Evolve with AI.
     </string>
+    <string name="title_activity_base">BaseActivity</string>
 </resources>

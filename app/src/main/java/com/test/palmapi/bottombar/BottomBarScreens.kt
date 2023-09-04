@@ -3,7 +3,7 @@ package com.test.palmapi.bottombar
 import com.test.palmapi.navigation.Screens
 
 sealed class BottomBarScreens(val route: String?, val title: String?, val icon: Int) {
-    object HistoryScreen : BottomBarScreens(
+    object DashboardScreen : BottomBarScreens(
         Screens.Home.route,
         "Home",
         com.test.palmapi.R.drawable.home
@@ -14,9 +14,16 @@ sealed class BottomBarScreens(val route: String?, val title: String?, val icon: 
         "Services",
         com.test.palmapi.R.drawable.services
     )
+
+    object ThemesScreen : BottomBarScreens(
+        Screens.Themes.route,
+        "Themes",
+        com.test.palmapi.R.drawable.themes
+    )
 }
 
 val items = listOf(
-    BottomBarScreens.HistoryScreen,
-    BottomBarScreens.GenerateScreen
+    BottomBarScreens.DashboardScreen,
+    BottomBarScreens.GenerateScreen,
+    BottomBarScreens.ThemesScreen
 )

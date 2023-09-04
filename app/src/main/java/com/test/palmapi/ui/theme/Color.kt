@@ -4,11 +4,13 @@ import android.content.Context
 import android.content.Intent
 import android.provider.Settings
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.unit.dp
+
 
 val Purple80 = Color(0xFFD0BCFF)
 val PurpleGrey80 = Color(0xFFCCC2DC)
@@ -67,22 +69,30 @@ val darkThemeColors = listOf(
 )
 val appGradient: Brush
     @Composable
-    get() = if (isDarkThemEnabled) Brush.verticalGradient(
-        colors = darkThemeColors,
+    get() = Brush.verticalGradient(
+        colors = listOf(
+            MaterialTheme.colorScheme.primary,
+            MaterialTheme.colorScheme.primary.copy(0.9f),
+            MaterialTheme.colorScheme.primary.copy(0.8f),
+            MaterialTheme.colorScheme.primary.copy(0.7f),
+            MaterialTheme.colorScheme.primary.copy(0.6f),
+            MaterialTheme.colorScheme.primary.copy(0.5f),
+            MaterialTheme.colorScheme.primary.copy(0.5f),
+        ),
         tileMode = TileMode.Clamp
-    ) else Brush.verticalGradient(colors = lightThemeColors, tileMode = TileMode.Clamp)
+    )
 
 val textColor: Color
     @Composable
-    get() = if (isDarkThemEnabled) Color.White else Color.Black
+    get() = MaterialTheme.colorScheme.surface
 
 val buttonColor: Color
     @Composable
-    get() = if (isDarkThemEnabled) Color(0xFF142a51) else Color(0xFFd6e2f8)
+    get() = MaterialTheme.colorScheme.primaryContainer
 
 val CardColor: Color
     @Composable
-    get() = if (isDarkThemEnabled) Color(0xFF01122E) else Color(0xFFF3F2F2)
+    get() = MaterialTheme.colorScheme.tertiary
 
 fun openDeviceThemeSettings(context: Context) {
     val intent = Intent(Settings.ACTION_DISPLAY_SETTINGS)

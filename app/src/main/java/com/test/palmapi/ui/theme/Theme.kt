@@ -1,19 +1,22 @@
 package com.test.palmapi.ui.theme
 
 import android.app.Activity
-import android.os.Build
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import com.test.palmapi.datastore.UserDatastore
+import com.test.palmapi.ui.theme.colorPalette.AquaBlissColors
+import com.test.palmapi.ui.theme.colorPalette.CelestialColors
+import com.test.palmapi.ui.theme.colorPalette.CornSilkColors
+import com.test.palmapi.ui.theme.colorPalette.RetrofuturistColors
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
@@ -39,20 +42,28 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun PalmApiTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = true,
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+    val context = LocalContext.current
+    val datastore = UserDatastore(context = context)
+    val currentTheme by datastore.getTheme.collectAsState(initial = ThemeMode.Celestial.name)
+    val themeMode = when (currentTheme) {
+        ThemeMode.Celestial.name -> ThemeMode.Celestial
+        ThemeMode.Retrofuturist.name -> ThemeMode.Retrofuturist
+        ThemeMode.AquaBliss.name -> ThemeMode.AquaBliss
+        ThemeMode.CornSilk.name -> ThemeMode.CornSilk
+        else -> ThemeMode.Celestial
     }
+    val colorScheme = when (themeMode) {
+        ThemeMode.Celestial -> CelestialColors
+        ThemeMode.Retrofuturist -> RetrofuturistColors
+        ThemeMode.CornSilk -> CornSilkColors
+        ThemeMode.AquaBliss -> AquaBlissColors
+    }
+
+
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {

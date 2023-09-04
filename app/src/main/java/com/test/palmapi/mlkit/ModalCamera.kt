@@ -253,7 +253,7 @@ fun BottomBox(
                     onTextClick()
                 },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF353739).copy(0.55f)
+                    containerColor = textColor
                 ),
                 modifier = Modifier
                     .fillMaxWidth()

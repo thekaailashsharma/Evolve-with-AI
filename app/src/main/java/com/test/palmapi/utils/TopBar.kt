@@ -34,6 +34,7 @@ import androidx.compose.material.icons.sharp.Bookmark
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
@@ -75,7 +76,6 @@ import com.test.palmapi.ui.theme.appGradient
 import com.test.palmapi.ui.theme.buttonColor
 import com.test.palmapi.ui.theme.githubColors
 import com.test.palmapi.ui.theme.googleColors
-import com.test.palmapi.ui.theme.isDarkThemEnabled
 import com.test.palmapi.ui.theme.monteNormal
 import com.test.palmapi.ui.theme.monteSB
 import com.test.palmapi.ui.theme.textColor
@@ -94,7 +94,7 @@ fun NewChatTopBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(if (isDarkThemEnabled) Color(0xFF081427) else Color(0xFFf0f5fc))
+            .background(MaterialTheme.colorScheme.primary)
             .padding(
                 start = 20.dp,
                 end = 20.dp,
@@ -117,7 +117,7 @@ fun NewChatTopBar(
             texts = if (viewModel.isSaved.value) listOf(viewModel.savedName.value) else texts,
             text = if (viewModel.isSaved.value) viewModel.savedName.value else "",
             modifier = Modifier.padding(start = if (viewModel.isSaved.value) 5.dp else 30.dp),
-            delay = 160L
+            delay = 50L
         )
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -239,8 +239,7 @@ fun ExpandedTopBarHomeScreen(
         }
 
         Spacer(modifier = Modifier.height(15.dp))
-        val containerColor = if (isDarkThemEnabled) Color(0xFF162130)
-        else Color(0xFFe6e9f1)
+        val containerColor = MaterialTheme.colorScheme.onPrimaryContainer
         OutlinedTextField(
             modifier = Modifier
                 .fillMaxWidth()
@@ -389,7 +388,7 @@ fun NewChatBottomBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(if (isDarkThemEnabled) Color(0xFF081427) else Color(0xFFf0f5fc))
+            .background(MaterialTheme.colorScheme.primary)
             .padding(
                 start = 10.dp,
                 end = 10.dp,
@@ -435,8 +434,7 @@ fun NewChatBottomBar(
             modifier = Modifier.fillMaxWidth(0.8f),
             horizontalArrangement = Arrangement.Center
         ) {
-            val containerColor = if (isDarkThemEnabled) Color(0xFF162130)
-            else Color(0xFFe6e9f1)
+            val containerColor = MaterialTheme.colorScheme.onTertiaryContainer
             OutlinedTextField(
                 value = text,
                 onValueChange = {
@@ -537,8 +535,7 @@ fun BottomSheetContent(viewModel: MainViewModel, navController: NavHostControlle
 
         }
         val context = LocalContext.current
-        val containerColor = if (isDarkThemEnabled) Color(0xFF162130)
-        else Color(0xFFe6e9f1)
+        val containerColor = MaterialTheme.colorScheme.onTertiaryContainer
         OutlinedTextField(
             value = text,
             onValueChange = {

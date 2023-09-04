@@ -1,6 +1,5 @@
 package com.test.palmapi.imeService.ui
 
-import android.R
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -16,7 +15,6 @@ import androidx.compose.ui.unit.dp
 import com.test.palmapi.imeService.Action
 import com.test.palmapi.ui.theme.CardColor
 import com.test.palmapi.ui.theme.textColor
-import kotlinx.coroutines.launch
 
 @Composable
 fun RepeatedActionCard(
@@ -28,10 +26,13 @@ fun RepeatedActionCard(
             containerColor = CardColor
         ),
         shape = RoundedCornerShape(10.dp),
-        modifier = Modifier.padding(7.dp)
-    ) {
+        modifier = Modifier.padding(5.dp),
+
+        ) {
         Column(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(7.dp),
             verticalArrangement = Arrangement.Center
         ) {
 

@@ -2,15 +2,10 @@ package com.test.palmapi.navigation
 
 import android.content.Intent
 import android.util.Log
-import androidx.compose.animation.AnimatedContentScope
-import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.foundation.layout.Column
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -20,10 +15,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NamedNavArgument
-import androidx.navigation.NavBackStackEntry
-import androidx.navigation.NavDeepLink
-import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -41,6 +32,7 @@ import com.test.palmapi.newChat.NewChat
 import com.test.palmapi.prompts.PromptScreen
 import com.test.palmapi.savedChat.SavedChat
 import com.test.palmapi.services.OurServices
+import com.test.palmapi.theming.MultipleThemes
 import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -169,6 +161,9 @@ fun NavController(dynamicLink: String) {
                 prompt = dynamicLink.substringAfter("contentt=").substringBefore("+emotion="),
                 emotion = dynamicLink.substringAfter("+emotion=")
             )
+        }
+        composable(Screens.Themes.route) {
+            MultipleThemes(navController = navController)
         }
     }
 

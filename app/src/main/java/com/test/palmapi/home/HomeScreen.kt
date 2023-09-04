@@ -24,6 +24,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -38,7 +39,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -143,7 +143,7 @@ fun HomeScreen(
                             ) {
                                 Text(
                                     text = "Your Saved Chats",
-                                    color = textColor,
+                                    color = MaterialTheme.colorScheme.onError,
                                     fontSize = 20.sp,
                                     fontFamily = monteSB,
                                     modifier = Modifier.padding(top = 10.dp, bottom = 10.dp)
@@ -232,14 +232,14 @@ fun HomeScreen(
                             Spacer(modifier = Modifier.height(25.dp))
                             Text(
                                 text = "Smartening Android",
-                                color = textColor.copy(0.75f),
+                                color = MaterialTheme.colorScheme.onError.copy(0.75f),
                                 fontSize = 24.sp,
                                 fontFamily = monteSB,
                             )
                             Spacer(modifier = Modifier.height(10.dp))
                             Text(
                                 text = "Evolving You !!",
-                                color = textColor.copy(0.75f),
+                                color = MaterialTheme.colorScheme.onError.copy(0.5f),
                                 fontSize = 19.sp,
                                 fontFamily = monteSB,
                             )
@@ -313,7 +313,7 @@ fun SavedCard(
             Text(
                 text = timeStamp,
                 modifier = Modifier.padding(0.dp),
-                color = Color.Gray,
+                color = textColor,
                 fontSize = 10.sp,
                 fontFamily = monteSB
             )

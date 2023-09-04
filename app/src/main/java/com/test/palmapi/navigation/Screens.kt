@@ -10,5 +10,6 @@ sealed class Screens(val route: String){
     object BarCodeOnly : Screens("barCodeOnly")
     object TextROnly : Screens("textROnly")
     object PromptChat : Screens("promptChat")
+    object Themes : Screens("themes")
 
 }

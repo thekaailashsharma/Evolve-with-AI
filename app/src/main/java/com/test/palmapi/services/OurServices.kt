@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -160,14 +161,14 @@ fun OurServices(navController: NavHostController) {
                     Spacer(modifier = Modifier.height(25.dp))
                     Text(
                         text = "Your Confidentiality",
-                        color = textColor.copy(0.75f),
+                        color = MaterialTheme.colorScheme.onError.copy(0.75f),
                         fontSize = 26.sp,
                         fontFamily = monteSB,
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
                         text = "Our Priority Always !",
-                        color = textColor.copy(0.75f),
+                        color = MaterialTheme.colorScheme.onError.copy(0.5f),
                         fontSize = 19.sp,
                         fontFamily = monteSB,
                     )
@@ -249,7 +250,7 @@ fun ServicesCard(
             containerColor = Color.Transparent,
         ),
         shape = RoundedCornerShape(15.dp),
-        elevation = CardDefaults.elevatedCardElevation(3.dp)
+        elevation = CardDefaults.cardElevation(0.dp)
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -305,7 +306,7 @@ fun ServicesCard(
                             text = "Type anything inside (( )) to get answers from AI..",
                             fontSize = 10.sp,
                             softWrap = true,
-                            color = Color.Green,
+                            color = MaterialTheme.colorScheme.onError,
                             modifier = Modifier.padding(horizontal = 7.dp)
                         )
                         Spacer(modifier = Modifier.height(10.dp))
@@ -316,7 +317,7 @@ fun ServicesCard(
                                 text = "Evolve AI Keyboard is enabled!",
                                 fontSize = 10.sp,
                                 softWrap = true,
-                                color = Color.Green
+                                color = MaterialTheme.colorScheme.onError
                             )
                         } else {
                             Button(
@@ -355,7 +356,7 @@ fun ServicesCard(
                             text = "Type anything inside {{ }} to get answers from AI..",
                             fontSize = 10.sp,
                             softWrap = true,
-                            color = Color.Green,
+                            color = MaterialTheme.colorScheme.onError,
                             modifier = Modifier.padding(horizontal = 7.dp)
                         )
                         Spacer(modifier = Modifier.height(10.dp))
@@ -364,7 +365,7 @@ fun ServicesCard(
                                 text = "Accessibility is enabled!",
                                 fontSize = 10.sp,
                                 softWrap = true,
-                                color = Color.Green
+                                color = MaterialTheme.colorScheme.onError
                             )
                         } else {
                             Button(

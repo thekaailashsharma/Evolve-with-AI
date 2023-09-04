@@ -18,6 +18,7 @@ class UserDatastore(private val context: Context) {
         val userName = stringPreferencesKey("userName")
         val uniqueId = stringPreferencesKey("uniqueId")
         val storedText = stringPreferencesKey("store")
+        val currentTheme = stringPreferencesKey("currentTheme")
     }
 
     val getEmail: Flow<String> = context.datastore.data.map {
@@ -67,6 +68,17 @@ class UserDatastore(private val context: Context) {
     suspend fun saveName(name: String) {
         context.datastore.edit {
             it[userName] = name
+        }
+    }
+
+
+    val getTheme: Flow<String> = context.datastore.data.map {
+        it[currentTheme] ?: ""
+    }
+
+    suspend fun saveTheme(theme: String) {
+        context.datastore.edit {
+            it[currentTheme] = theme
         }
     }
 
