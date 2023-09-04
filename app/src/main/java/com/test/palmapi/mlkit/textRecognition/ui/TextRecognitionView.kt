@@ -37,7 +37,6 @@ import androidx.lifecycle.LifecycleOwner
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import com.test.palmapi.mlkit.textRecognition.TextRecognizer
-import com.test.palmapi.ui.theme.textColor
 import java.util.concurrent.Executors
 
 @Composable
@@ -116,13 +115,13 @@ fun TextRecognitionView(
                         Icon(
                             imageVector = Icons.Sharp.FlashOn,
                             contentDescription = "",
-                            tint = textColor
+                            tint = Color.White
                         )
                     } else {
                         Icon(
                             imageVector = Icons.Sharp.FlashOff,
                             contentDescription = "",
-                            tint = textColor
+                            tint = Color.White
                         )
                     }
 
@@ -135,7 +134,7 @@ fun TextRecognitionView(
                     Icon(
                         imageVector = Icons.Sharp.Cameraswitch,
                         contentDescription = "",
-                        tint = textColor
+                        tint = Color.White
                     )
                 }
 

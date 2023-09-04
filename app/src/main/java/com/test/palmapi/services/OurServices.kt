@@ -303,7 +303,7 @@ fun ServicesCard(
                 when (serviceName) {
                     Keyboard -> {
                         Text(
-                            text = "Type anything inside (( )) to get answers from AI..",
+                            text = "Just click the evolve logo to call AI",
                             fontSize = 10.sp,
                             softWrap = true,
                             color = MaterialTheme.colorScheme.onError,
@@ -388,11 +388,11 @@ fun ServicesCard(
                     }
 
                     TextRecognition -> {
-                        navController.navigate(Screens.TextROnly.route)
+                        navController.navigate(Screens.ModalCamera.route)
                     }
 
                     BarCodeScanner -> {
-                        navController.navigate(Screens.BarCodeOnly.route)
+                        navController.navigate(Screens.ModalCamera.route)
                     }
                 }
             }

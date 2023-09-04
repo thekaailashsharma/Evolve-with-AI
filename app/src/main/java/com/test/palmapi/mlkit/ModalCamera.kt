@@ -50,9 +50,9 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.test.palmapi.R
 import com.test.palmapi.mlkit.barcode.ui.CodeScannerView
 import com.test.palmapi.mlkit.textRecognition.ui.TextRecognitionView
+import com.test.palmapi.ui.theme.buttonColor
 import com.test.palmapi.ui.theme.monteNormal
 import com.test.palmapi.ui.theme.monteSB
-import com.test.palmapi.ui.theme.textColor
 import com.test.palmapi.utils.Grapple
 import com.test.palmapi.utils.PermissionDrawer
 
@@ -163,7 +163,7 @@ fun BottomBox(
                             .padding(bottom = 0.dp)
                             .requiredHeight(15.dp)
                             .requiredWidth(55.dp)
-                            .alpha(0.22f), color = textColor
+                            .alpha(0.22f), color = Color.White
                     )
                 }
                 Row(
@@ -179,7 +179,7 @@ fun BottomBox(
                     ) {
                         Text(
                             text = model,
-                            color = textColor,
+                            color = Color.White,
                             fontSize = 25.sp,
                             fontFamily = monteSB,
 
@@ -187,7 +187,7 @@ fun BottomBox(
                         if (isTextClicked) {
                             Text(
                                 text = "Long click select text",
-                                color = textColor,
+                                color = Color.White,
                                 fontFamily = monteSB,
                                 fontSize = 13.sp
                             )
@@ -203,7 +203,7 @@ fun BottomBox(
                         Icon(
                             imageVector = Icons.Outlined.ChangeCircle,
                             contentDescription = "",
-                            tint = textColor
+                            tint = Color.White
                         )
 
                     }
@@ -221,7 +221,7 @@ fun BottomBox(
                         SelectionContainer {
                             Text(
                                 text = code,
-                                color = textColor,
+                                color = Color.White,
                                 fontSize = 16.sp,
                                 fontFamily = monteNormal,
                                 softWrap = true
@@ -230,7 +230,7 @@ fun BottomBox(
                     } else {
                         Text(
                             text = code,
-                            color = textColor,
+                            color = Color.White,
                             fontSize = 16.sp,
                             fontFamily = monteNormal,
                             softWrap = true
@@ -253,7 +253,7 @@ fun BottomBox(
                     onTextClick()
                 },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = textColor
+                    containerColor = buttonColor
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -262,7 +262,7 @@ fun BottomBox(
             ) {
                 Text(
                     text = if (isTextClicked) "Capture Again" else "Select Text",
-                    color = textColor,
+                    color = Color.White,
                     fontFamily = monteSB,
                     fontSize = 13.sp
                 )

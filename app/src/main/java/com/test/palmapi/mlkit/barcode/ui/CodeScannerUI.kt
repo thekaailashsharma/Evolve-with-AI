@@ -38,7 +38,6 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import com.google.common.util.concurrent.ListenableFuture
 import com.test.palmapi.mlkit.barcode.QrCodeAnalyzer
-import com.test.palmapi.ui.theme.textColor
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -129,13 +128,13 @@ fun CodeScannerView(code: MutableState<String>) {
                         Icon(
                             imageVector = Icons.Sharp.FlashOn,
                             contentDescription = "",
-                            tint = textColor
+                            tint = Color.White
                         )
                     } else {
                         Icon(
                             imageVector = Icons.Sharp.FlashOff,
                             contentDescription = "",
-                            tint = textColor
+                            tint = Color.White
                         )
                     }
 
@@ -148,7 +147,7 @@ fun CodeScannerView(code: MutableState<String>) {
                     Icon(
                         imageVector = Icons.Sharp.Cameraswitch,
                         contentDescription = "",
-                        tint = textColor
+                        tint = Color.White
                     )
                 }
 
