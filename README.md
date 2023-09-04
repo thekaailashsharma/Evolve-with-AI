@@ -1,8 +1,8 @@
 
 <h1 align="center">  📲✨Evolve with AI  🚀 </h1> <br>
 <p align="center">
-  <a href="https://firebasestorage.googleapis.com/v0/b/palmapi-b548f.appspot.com/o/Thumbnail.png?alt=media&token=92e8d3d9-7fe7-41f4-80dc-2d862185589c">
-    <img src="https://firebasestorage.googleapis.com/v0/b/palmapi-b548f.appspot.com/o/Thumbnail.png?alt=media&token=92e8d3d9-7fe7-41f4-80dc-2d862185589c" alt="HiewAF9.md.png" border="0">
+  <a href="https://firebasestorage.googleapis.com/v0/b/palmapi-b548f.appspot.com/o/Screenshot%202023-09-04%20at%2011.08.10%20AM.png?alt=media&token=243564ad-de5d-4382-9111-0d4133801cc9">
+    <img src="https://firebasestorage.googleapis.com/v0/b/palmapi-b548f.appspot.com/o/Screenshot%202023-09-04%20at%2011.08.10%20AM.png?alt=media&token=243564ad-de5d-4382-9111-0d4133801cc9" alt="HiewAF9.md.png" border="0">
   </a
 </p>
 
