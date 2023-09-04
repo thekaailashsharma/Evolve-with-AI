@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -265,7 +266,7 @@ fun LoginScreen(navHostController: NavHostController, viewModel: MainViewModel) 
                 withStyle(
                     SpanStyle(
                         fontFamily = monteBold,
-                        color = Color.LightGray,
+                        color = MaterialTheme.colorScheme.onError,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Normal
                     )
