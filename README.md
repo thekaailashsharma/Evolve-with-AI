@@ -11,6 +11,8 @@
 </p>
 
 
+
+
 ## Introduction
 ![alt text](https://img.shields.io/badge/Kotlin-FFFFFF?style=for-the-badge&logo=Kotlin) 
 ![alt text](https://img.shields.io/badge/Firebase-FFFFFF?style=for-the-badge&logo=Firebase) 
@@ -21,9 +23,21 @@ Experience the power of AI on your Android device!. Made with Kotlin and Jetpack
 
 **Available only for Android.**
 
-<p align="center">
-  <a href="https://freeimage.host/"><img src="https://iili.io/HieevMQ.png" alt="HieevMQ.png" border="0"></a>
-</p>
+## What's new v2.0.0
+
+
+- Introducing Multiple Themes
+- Fix Major Bugs
+- Completely new Aesthetic look
+- Now u can preview AI responses on your keyboard
+- You no more need to (()) for AI call in your keyboard
+- Clipboard Integration Start
+- Fix Navigation Issue
+
+
+| Aquabliss  | Celestial  | Cornsilk  | Retrofuturist  | 
+|--------|-------|--------|-------|
+| ![theme_aquabliss](https://github.com/thekaailashsharma/Evolve-with-AI/assets/61358755/c8e9f7a1-9646-4cae-94a9-0ab7962c95ba) | ![theme_celestial](https://github.com/thekaailashsharma/Evolve-with-AI/assets/61358755/940760d7-7be4-44e5-90c3-9d12c49f64df)| ![theme_cornsilk](https://github.com/thekaailashsharma/Evolve-with-AI/assets/61358755/2191b592-ea95-49eb-a6a9-07117c4d68c7) | ![theme_retrofuturist](https://github.com/thekaailashsharma/Evolve-with-AI/assets/61358755/87f4f3d9-1e7a-4ea2-baab-a10c54491b19) |
 
 ## 💬💡 Features
 
