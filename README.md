@@ -113,6 +113,19 @@ Following latest Android Norms
 | Authenticator | (Required) To manage Accounts on your Device |
 
 
+## Steps To Run on your Device
+- The Following project was build using `AGP 8.1.0`
+-  Check your Android Studio's AGP.
+-  If it is `lower` than given AGP follow given steps :-
+-  -  #### Go to gradle/libs.version.toml
+   -  #### In [versions] change value of AGP as per requirement
+
+## Steps To Install on your Device
+- Visit the following link 
+- [Install Now](https://drive.google.com/drive/folders/1_7WE-4dCml47C_-qDqwgjFeg9vxYwvf4?usp=sharing)
+- Minimum SDK `27` --> `Android version 8.1`
+
+
 
 
 ## Authors
