@@ -26,10 +26,10 @@ Experience the power of AI on your Android device!. Made with Kotlin and Jetpack
 ## What's new v2.0.0
 
 
-- Introducing Multiple Themes
+- Introducing `Multiple Themes`
 - Fix Major Bugs
-- Completely new Aesthetic look
-- Now u can preview AI responses on your keyboard
+- Completely new `Aesthetic` look
+- Now u can `preview AI responses` on your keyboard
 - You no more need to (()) for AI call in your keyboard
 - Clipboard Integration Start
 - Fix Navigation Issue
@@ -43,21 +43,24 @@ Experience the power of AI on your Android device!. Made with Kotlin and Jetpack
 
 A few of the things you can do with Evolve:
 
-- AI integration into Keyboard (just use (( )) to call AI)
-- Accessibility made easy (use {{ }} to interact with AI)
-- MLKIT with text recognition & barcode scanning 📷💡
-- Multiple accounts for personalized AI experience
+- AI integration into `Keyboard` 
+- Accessibility made easy.
+- `MLKIT` with text recognition & barcode scanning 📷💡
+- `Multiple accounts` for personalized AI experience
 - Share conversations effortlessly! 🔄💬
 
 ## Tech Stack
 
 Following latest Android Norms
 
-- Kotlin DSl used (with version catalog .toml file)
-- Ime Service in Jetpack Compose
-- Accessibility service
-- Ktor-Client used.
-- Account Manager for Android.
+- `Kotlin DSl` used (with version catalog .toml file).
+- `Ime Service` in Jetpack Compose.
+- `Accessibility service` for Android.
+- `Account Manager` for Android.
+- `MVVM` Architecture using Dagger Hilt.
+- `Ktor-Client` (Reason: to use kotlin specific libraries so that it can easily be scaled for KMM).
+- Connectivity Status using `Network Manager`.
+- Beautiful `Lottie` Animations.
 
 
 <p align="center">
