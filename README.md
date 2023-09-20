@@ -76,7 +76,7 @@ Following latest Android Norms
 
 
 ## 📽️ Demo Video
-[Demo Video](https://www.linkedin.com/feed/update/urn:li:activity:7081408152709062656/)
+[Demo Video](https://www.youtube.com/watch?v=NEXuoepwnC4&feature=youtu.be)
 
 ## 📦 Packages
 
