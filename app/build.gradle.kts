@@ -167,6 +167,14 @@ dependencies {
     //Navigation Compose
     implementation("androidx.navigation:navigation-compose:2.7.0-alpha01")
 
+    //material dialogs
+    implementation("io.github.vanpra.compose-material-dialogs:core:0.9.0")
+    implementation("io.github.vanpra.compose-material-dialogs:datetime:0.9.0")
+
+    //For zoomable images
+    implementation("de.mr-pine.utils:zoomables:1.1.2")
+    implementation("androidx.compose.ui:ui-util")
+
     //Test Android
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)
