@@ -10,7 +10,8 @@ import com.test.palmapi.database.accounts.AccountsDao
 import com.test.palmapi.database.chats.ChatDao
 import com.test.palmapi.database.chats.ChatMessage
 
-@Database(entities = [ChatMessage::class, Accounts::class], version = 1)
+
+@Database(entities = [ChatMessage::class, Accounts::class], version = 2)
 abstract class DatabaseObject : RoomDatabase() {
 
     abstract fun chatDao(): ChatDao

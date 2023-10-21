@@ -36,7 +36,7 @@ object AppModule {
                 }
             }
             install(HttpTimeout) {
-                requestTimeoutMillis = 10000
+                requestTimeoutMillis = 1000000
             }
         }
     }

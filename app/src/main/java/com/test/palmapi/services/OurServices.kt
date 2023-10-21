@@ -45,8 +45,10 @@ import com.test.palmapi.bottombar.BottomBar
 import com.test.palmapi.navigation.Screens
 import com.test.palmapi.services.TypesOfService.Accessibility
 import com.test.palmapi.services.TypesOfService.BarCodeScanner
+import com.test.palmapi.services.TypesOfService.ImageToText
 import com.test.palmapi.services.TypesOfService.Keyboard
 import com.test.palmapi.services.TypesOfService.TextRecognition
+import com.test.palmapi.services.TypesOfService.TextToImage
 import com.test.palmapi.ui.theme.appGradient
 import com.test.palmapi.ui.theme.monteSB
 import com.test.palmapi.ui.theme.textColor
@@ -60,7 +62,7 @@ data class Services(
 )
 
 enum class TypesOfService {
-    Keyboard, Accessibility, TextRecognition, BarCodeScanner
+    Keyboard, Accessibility, TextRecognition, BarCodeScanner, TextToImage, ImageToText
 }
 
 enum class CardState { Front, Back }
@@ -86,6 +88,19 @@ val items2 = listOf(
     Services(
         name = BarCodeScanner,
         desc = "Use our barcode scanner to scan barcodes from images !",
+        anim = LottieCompositionSpec.Asset("qrcode.json")
+    )
+)
+
+val items3 = listOf(
+    Services(
+        name = TextToImage,
+        desc = "Generate beautiful AI powered images!",
+        anim = LottieCompositionSpec.Asset("imagefromtext.json")
+    ),
+    Services(
+        name = ImageToText,
+        desc = "Get Insights from Image using AI!",
         anim = LottieCompositionSpec.Asset("qrcode.json")
     )
 )
@@ -153,6 +168,18 @@ fun OurServices(navController: NavHostController) {
                 )
             }
             item {
+                TwoServicesCard(
+                    navController = navController,
+                    spec1 = items3[0].anim,
+                    serviceName1 = items3[0].name,
+                    serviceDesc1 = items3[0].desc,
+                    spec2 = items3[1].anim,
+                    serviceName2 = items3[1].name,
+                    serviceDesc2 = items3[1].desc,
+                    isServiceTwoThere = false
+                )
+            }
+            item {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -185,6 +212,7 @@ fun TwoServicesCard(
     spec1: LottieCompositionSpec,
     serviceName1: TypesOfService,
     serviceDesc1: String,
+    isServiceTwoThere: Boolean = true,
     spec2: LottieCompositionSpec,
     serviceName2: TypesOfService,
     serviceDesc2: String,
@@ -203,16 +231,18 @@ fun TwoServicesCard(
                 serviceDesc = serviceDesc1
             )
         }
-        Row(
-            modifier = Modifier.fillMaxWidth(1f),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            ServicesCard(
-                navController = navController,
-                spec = spec2,
-                serviceName = serviceName2,
-                serviceDesc = serviceDesc2
-            )
+        if (isServiceTwoThere) {
+            Row(
+                modifier = Modifier.fillMaxWidth(1f),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                ServicesCard(
+                    navController = navController,
+                    spec = spec2,
+                    serviceName = serviceName2,
+                    serviceDesc = serviceDesc2
+                )
+            }
         }
     }
 
@@ -393,6 +423,58 @@ fun ServicesCard(
 
                     BarCodeScanner -> {
                         navController.navigate(Screens.ModalCamera.route)
+                    }
+
+                    TextToImage -> {
+                        Text(
+                            text = "Get amazing images from text!",
+                            fontSize = 10.sp,
+                            softWrap = true,
+                            color = MaterialTheme.colorScheme.onError,
+                            modifier = Modifier.padding(horizontal = 7.dp)
+                        )
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Button(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 5.dp),
+                            onClick = {
+                                navController.navigate(Screens.TextToImage.route)
+                            }
+                        ) {
+                            Text(
+                                text = "Generate Image",
+                                fontSize = 10.sp,
+                                softWrap = true
+                            )
+                        }
+                    }
+
+                    ImageToText -> {
+                        Text(
+                            text = "What AI tells you about the image",
+                            fontSize = 10.sp,
+                            softWrap = true,
+                            color = MaterialTheme.colorScheme.onError,
+                            modifier = Modifier.padding(horizontal = 7.dp)
+                        )
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Button(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 5.dp),
+                            onClick = {
+
+                            },
+                            enabled = true
+                        ) {
+                            Text(
+                                text = "Coming Soon",
+                                fontSize = 10.sp,
+                                softWrap = true
+                            )
+                        }
+
                     }
                 }
             }

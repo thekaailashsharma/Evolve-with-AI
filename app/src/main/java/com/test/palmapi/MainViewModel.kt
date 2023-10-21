@@ -11,6 +11,7 @@ import com.test.palmapi.database.accounts.Accounts
 import com.test.palmapi.database.chats.ChatMessage
 import com.test.palmapi.datastore.UserDatastore
 import com.test.palmapi.dto.ApiPrompt
+import com.test.palmapi.dto.ImageFromText
 import com.test.palmapi.dto.PalmApi
 import com.test.palmapi.dto.Prompt
 import com.test.palmapi.login.SignInResult
@@ -20,6 +21,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
@@ -36,6 +38,7 @@ class MainViewModel @Inject constructor(
     var apiData: MutableState<PalmApi?> = mutableStateOf(null)
     val listOfMessages: MutableState<MutableList<ChatMessage>> = mutableStateOf(mutableListOf())
     val message: MutableState<String> = mutableStateOf("")
+    val imagePrompt: MutableState<String> = mutableStateOf("")
     fun allMessages(uid: String): Flow<List<ChatMessage>> = dbRepository.allMessages(uid)
     fun getType(uid: String) = dbRepository.getType(uid)
     fun savedMessages(savedName: String): Flow<List<ChatMessage>> =
@@ -52,6 +55,10 @@ class MainViewModel @Inject constructor(
     private val _state = MutableStateFlow(SignInState())
     val state = _state.asStateFlow()
 
+    // StateFlow to manage image loading state
+    private val _imageState = MutableStateFlow<ImageState>(ImageState.NotStarted)
+    val imageState: StateFlow<ImageState> = _imageState.asStateFlow()
+
     init {
         viewModelScope.launch {
             datastore.getUID.collectLatest {
@@ -59,6 +66,28 @@ class MainViewModel @Inject constructor(
             }
         }
         allAccounts = dbRepository.allAccounts
+    }
+
+
+    fun fetchImage(prompt: String) {
+        _imageState.value = ImageState.Loading
+        viewModelScope.launch {
+            try {
+                val imageData = repository.textToImage(
+                    ImageFromText(
+                        inputs = prompt
+                    )
+                )
+                if (imageData != null) {
+                    _imageState.value = ImageState.Loaded(imageData)
+                    Log.i("Imagesssssssss", _imageState.value.toString())
+                } else {
+                    _imageState.value = ImageState.Error(Exception("Something went wrong."))
+                }
+            } catch (e: Exception) {
+                _imageState.value = ImageState.Error(e)
+            }
+        }
     }
 
     fun onSignInResult(result: SignInResult) {
@@ -156,3 +185,28 @@ class MainViewModel @Inject constructor(
         }
     }
 }
+
+sealed class ImageState {
+    object Loading : ImageState()
+    data class Loaded(val imageData: ByteArray) : ImageState() {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as Loaded
+
+            if (!imageData.contentEquals(other.imageData)) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            return imageData.contentHashCode()
+        }
+    }
+
+    data class Error(val exception: Exception) : ImageState()
+
+    object NotStarted : ImageState()
+}
+

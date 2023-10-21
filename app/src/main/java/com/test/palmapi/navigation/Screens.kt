@@ -11,5 +11,6 @@ sealed class Screens(val route: String){
     object TextROnly : Screens("textROnly")
     object PromptChat : Screens("promptChat")
     object Themes : Screens("themes")
+    object TextToImage : Screens("textToImage")
 
 }

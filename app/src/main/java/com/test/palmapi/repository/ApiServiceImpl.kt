@@ -4,6 +4,7 @@ import android.util.Log
 import com.test.palmapi.BuildConfig
 import com.test.palmapi.dto.ApiPrompt
 import com.test.palmapi.dto.Candidate
+import com.test.palmapi.dto.ImageFromText
 import com.test.palmapi.dto.PalmApi
 import io.ktor.client.HttpClient
 import io.ktor.client.request.headers
@@ -36,6 +37,24 @@ class ApiServiceImpl(
                 )
             )
         }
+    }
+
+    override suspend fun textToImage(imageFromText: ImageFromText): ByteArray? {
+        return try {
+            val a = client.post<ByteArray> {
+                url("https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0")
+                body = imageFromText
+                headers {
+                    this.append("Authorization", "Bearer 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")
+                    this.append("Content-Type", "application/json")
+                }
+            }
+            a
+        } catch (e: Exception) {
+            Log.i("ApiException", e.message.toString())
+            null
+        }
+
     }
 }
 
