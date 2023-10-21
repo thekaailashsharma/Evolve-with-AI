@@ -85,14 +85,17 @@ import com.test.palmapi.ui.theme.ybc
 
 @Composable
 fun NewChatTopBar(
+    modifier: Modifier = Modifier,
     viewModel: MainViewModel,
     onSave: () -> Unit = {},
+    isAIImage: Boolean = false,
     navHostController: NavHostController
 ) {
     val texts = listOf("New Chat")
+    val aiImage = listOf("AI Images")
     val context = LocalContext.current
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.primary)
             .padding(
@@ -102,6 +105,7 @@ fun NewChatTopBar(
                 bottom = 16.dp
             ),
     ) {
+
         Icon(
             imageVector = Icons.Sharp.ArrowBackIos,
             contentDescription = "Back",
@@ -112,50 +116,60 @@ fun NewChatTopBar(
                     navHostController.navigateUp()
                 }
         )
-
-        TypewriterText(
-            texts = if (viewModel.isSaved.value) listOf(viewModel.savedName.value) else texts,
-            text = if (viewModel.isSaved.value) viewModel.savedName.value else "",
-            modifier = Modifier.padding(start = if (viewModel.isSaved.value) 5.dp else 30.dp),
-            delay = 50L
-        )
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = Icons.Sharp.Bookmark,
-                contentDescription = "Bookmark",
-                tint = textColor,
-                modifier = Modifier
-                    .size(24.dp)
-                    .clickable {
-                        onSave()
-                    }
+        if (isAIImage){
+            TypewriterText(
+                texts = aiImage,
+                text =  "",
+                modifier = Modifier.padding(start = 30.dp),
+                delay = 50L
             )
-            Spacer(modifier = Modifier.width(15.dp))
-            Icon(
-                imageVector = Icons.Outlined.Feedback,
-                contentDescription = "Share",
-                tint = textColor,
-                modifier = Modifier
-                    .size(24.dp)
-                    .clickable {
-                        val intent = Intent(Intent.ACTION_SEND)
-                        intent.putExtra(Intent.EXTRA_EMAIL, arrayOf("kailashps.1011@gmail.com"))
-                        intent.putExtra(Intent.EXTRA_SUBJECT, "Feedback:Evolve with AI")
-                        intent.setType("message/rfc822")
-                        context.startActivity(
-                            Intent.createChooser(
-                                intent,
-                                "Please share your feedback"
+        } else {
+            TypewriterText(
+                texts = if (viewModel.isSaved.value) listOf(viewModel.savedName.value) else texts,
+                text = if (viewModel.isSaved.value) viewModel.savedName.value else "",
+                modifier = Modifier.padding(start = if (viewModel.isSaved.value) 5.dp else 30.dp),
+                delay = 50L
+            )
+        }
+        if (!isAIImage) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Sharp.Bookmark,
+                    contentDescription = "Bookmark",
+                    tint = textColor,
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clickable {
+                            onSave()
+                        }
+                )
+                Spacer(modifier = Modifier.width(15.dp))
+                Icon(
+                    imageVector = Icons.Outlined.Feedback,
+                    contentDescription = "Share",
+                    tint = textColor,
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clickable {
+                            val intent = Intent(Intent.ACTION_SEND)
+                            intent.putExtra(Intent.EXTRA_EMAIL, arrayOf("kailashps.1011@gmail.com"))
+                            intent.putExtra(Intent.EXTRA_SUBJECT, "Feedback:Evolve with AI")
+                            intent.setType("message/rfc822")
+                            context.startActivity(
+                                Intent.createChooser(
+                                    intent,
+                                    "Please share your feedback"
+                                )
                             )
-                        )
-                    }
-            )
+                        }
+                )
 
 
+            }
         }
 
     }
@@ -374,6 +388,7 @@ fun CollapsedTopBarHomeScreen(
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun NewChatBottomBar(
+    modifier: Modifier = Modifier,
     navController: NavHostController,
     viewModel: MainViewModel,
     text: TextFieldValue,
@@ -386,7 +401,7 @@ fun NewChatBottomBar(
     val isKeyboardOpen by keyboardAsState()
     Log.i("Messages", viewModel.listOfMessages.value.toString())
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.primary)
             .padding(

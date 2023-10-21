@@ -32,6 +32,7 @@ import com.test.palmapi.newChat.NewChat
 import com.test.palmapi.prompts.PromptScreen
 import com.test.palmapi.savedChat.SavedChat
 import com.test.palmapi.services.OurServices
+import com.test.palmapi.textToImage.TextToImageScreen
 import com.test.palmapi.theming.MultipleThemes
 import kotlinx.coroutines.flow.collectLatest
 
@@ -55,13 +56,13 @@ fun NavController(dynamicLink: String) {
     val pfp = dataStore.getPfp.collectAsState(initial = "")
     val uid = dataStore.getUID.collectAsState(initial = "")
     var type by remember { mutableStateOf("") }
-    LaunchedEffect(key1 = viewModel.getType(uid.value)) {
-        if (uid.value != "") {
-            viewModel.getType(uid.value).collectLatest {
-                type = it.type
-            }
-        }
-    }
+//    LaunchedEffect(key1 = viewModel.getType(uid.value)) {
+//        if (uid.value != "") {
+//            viewModel.getType(uid.value).collectLatest {
+//                type = it.type
+//            }
+//        }
+//    }
 
     NavHost(
         navController = navController,
@@ -164,6 +165,14 @@ fun NavController(dynamicLink: String) {
         }
         composable(Screens.Themes.route) {
             MultipleThemes(navController = navController)
+        }
+
+        composable(Screens.TextToImage.route) {
+            TextToImageScreen(
+                viewModel = viewModel,
+                navHostController = navController,
+                userPfp = pfp.value
+            )
         }
     }
 
