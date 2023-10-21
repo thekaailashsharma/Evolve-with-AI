@@ -267,7 +267,7 @@ fun TextToImageScreen(
                         composition = currenanim2,
                         iterations = Int.MAX_VALUE,
                         contentScale = ContentScale.Crop,
-                        speed = 2.2f,
+                        speed = 0.8f,
                         modifier = Modifier
                             .size(200.dp)
                     )
