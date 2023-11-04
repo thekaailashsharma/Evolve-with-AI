@@ -33,6 +33,7 @@ import androidx.compose.material.icons.sharp.ArrowBackIos
 import androidx.compose.material.icons.sharp.Bookmark
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -71,11 +72,14 @@ import com.test.palmapi.R
 import com.test.palmapi.login.ProfileImage
 import com.test.palmapi.navigation.Screens
 import com.test.palmapi.ui.theme.COLLAPSED_TOP_BAR_HEIGHT
+import com.test.palmapi.ui.theme.CardColor
 import com.test.palmapi.ui.theme.EXPANDED_TOP_BAR_HEIGHT
 import com.test.palmapi.ui.theme.appGradient
+import com.test.palmapi.ui.theme.blueTint
 import com.test.palmapi.ui.theme.buttonColor
 import com.test.palmapi.ui.theme.githubColors
 import com.test.palmapi.ui.theme.googleColors
+import com.test.palmapi.ui.theme.greenText
 import com.test.palmapi.ui.theme.monteNormal
 import com.test.palmapi.ui.theme.monteSB
 import com.test.palmapi.ui.theme.textColor
@@ -94,84 +98,94 @@ fun NewChatTopBar(
     val texts = listOf("New Chat")
     val aiImage = listOf("AI Images")
     val context = LocalContext.current
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.primary)
-            .padding(
-                start = 20.dp,
-                end = 20.dp,
-                top = 20.dp,
-                bottom = 16.dp
-            ),
-    ) {
+    Column {
+        Row(
+            modifier = modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.primary)
+                .padding(
+                    start = 20.dp,
+                    end = 20.dp,
+                    top = 20.dp,
+                    bottom = 16.dp
+                ),
+        ) {
 
-        Icon(
-            imageVector = Icons.Sharp.ArrowBackIos,
-            contentDescription = "Back",
-            tint = textColor,
-            modifier = Modifier
-                .size(24.dp)
-                .clickable {
-                    navHostController.navigateUp()
-                }
-        )
-        if (isAIImage){
-            TypewriterText(
-                texts = aiImage,
-                text =  "",
-                modifier = Modifier.padding(start = 30.dp),
-                delay = 50L
+            Icon(
+                imageVector = Icons.Sharp.ArrowBackIos,
+                contentDescription = "Back",
+                tint = textColor,
+                modifier = Modifier
+                    .size(24.dp)
+                    .clickable {
+                        navHostController.navigateUp()
+                    }
             )
-        } else {
-            TypewriterText(
-                texts = if (viewModel.isSaved.value) listOf(viewModel.savedName.value) else texts,
-                text = if (viewModel.isSaved.value) viewModel.savedName.value else "",
-                modifier = Modifier.padding(start = if (viewModel.isSaved.value) 5.dp else 30.dp),
-                delay = 50L
-            )
-        }
-        if (!isAIImage) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Sharp.Bookmark,
-                    contentDescription = "Bookmark",
-                    tint = textColor,
-                    modifier = Modifier
-                        .size(24.dp)
-                        .clickable {
-                            onSave()
-                        }
+            if (isAIImage) {
+                TypewriterText(
+                    texts = aiImage,
+                    text = "",
+                    modifier = Modifier.padding(start = 30.dp),
+                    delay = 50L
                 )
-                Spacer(modifier = Modifier.width(15.dp))
-                Icon(
-                    imageVector = Icons.Outlined.Feedback,
-                    contentDescription = "Share",
-                    tint = textColor,
-                    modifier = Modifier
-                        .size(24.dp)
-                        .clickable {
-                            val intent = Intent(Intent.ACTION_SEND)
-                            intent.putExtra(Intent.EXTRA_EMAIL, arrayOf("kailashps.1011@gmail.com"))
-                            intent.putExtra(Intent.EXTRA_SUBJECT, "Feedback:Evolve with AI")
-                            intent.setType("message/rfc822")
-                            context.startActivity(
-                                Intent.createChooser(
-                                    intent,
-                                    "Please share your feedback"
-                                )
-                            )
-                        }
+            } else {
+                TypewriterText(
+                    texts = if (viewModel.isSaved.value) listOf(viewModel.savedName.value) else texts,
+                    text = if (viewModel.isSaved.value) viewModel.savedName.value else "",
+                    modifier = Modifier.padding(start = if (viewModel.isSaved.value) 5.dp else 30.dp),
+                    delay = 50L
                 )
-
-
             }
-        }
+            if (!isAIImage) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Sharp.Bookmark,
+                        contentDescription = "Bookmark",
+                        tint = textColor,
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clickable {
+                                onSave()
+                            }
+                    )
+                    Spacer(modifier = Modifier.width(15.dp))
+                    Icon(
+                        imageVector = Icons.Outlined.Feedback,
+                        contentDescription = "Share",
+                        tint = textColor,
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clickable {
+                                val intent = Intent(Intent.ACTION_SEND)
+                                intent.putExtra(
+                                    Intent.EXTRA_EMAIL,
+                                    arrayOf("kailashps.1011@gmail.com")
+                                )
+                                intent.putExtra(Intent.EXTRA_SUBJECT, "Feedback:Evolve with AI")
+                                intent.setType("message/rfc822")
+                                context.startActivity(
+                                    Intent.createChooser(
+                                        intent,
+                                        "Please share your feedback"
+                                    )
+                                )
+                            }
+                    )
 
+
+                }
+            }
+
+        }
+        Divider(
+            thickness = 1.dp,
+            color = textColor.copy(0.5f),
+            modifier = Modifier.padding(vertical =4.dp)
+        )
     }
 }
 
@@ -253,7 +267,7 @@ fun ExpandedTopBarHomeScreen(
         }
 
         Spacer(modifier = Modifier.height(15.dp))
-        val containerColor = MaterialTheme.colorScheme.onPrimaryContainer
+        val containerColor = MaterialTheme.colorScheme.primary
         OutlinedTextField(
             modifier = Modifier
                 .fillMaxWidth()
@@ -277,7 +291,7 @@ fun ExpandedTopBarHomeScreen(
                     Icon(
                         painter = painterResource(id = R.drawable.photo),
                         contentDescription = "Photos",
-                        tint = textColor,
+                        tint = blueTint,
                         modifier = Modifier
                             .size(20.dp)
                     )
@@ -285,7 +299,7 @@ fun ExpandedTopBarHomeScreen(
                     Icon(
                         painter = painterResource(id = R.drawable.mic),
                         contentDescription = "Microphone",
-                        tint = textColor,
+                        tint = blueTint,
                         modifier = Modifier
                             .size(22.dp)
                     )
@@ -303,6 +317,7 @@ fun ExpandedTopBarHomeScreen(
                 unfocusedTextColor = textColor
             )
         )
+        Divider(thickness = 1.dp, color = textColor.copy(0.5f), modifier = Modifier.padding(vertical =12.dp))
 
     }
 }
@@ -319,68 +334,71 @@ fun CollapsedTopBarHomeScreen(
         enter = expandVertically(animationSpec = tween(durationMillis = 300)) + fadeIn(),
         exit = shrinkVertically(animationSpec = tween(durationMillis = 300)) + fadeOut()
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(appGradient)
-                .height(COLLAPSED_TOP_BAR_HEIGHT)
-                .padding(vertical = 10.dp, horizontal = 20.dp)
-                .graphicsLayer {
-                    translationY = -scroll.firstVisibleItemIndex.toFloat() / 2f
-                },
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(text = buildAnnotatedString {
-                withStyle(
-                    style = SpanStyle(
-                        fontFamily = ybc,
-                        color = textColor,
-                        fontSize = 32.sp,
-                        fontWeight = FontWeight.Black
-                    )
-                ) {
-                    append("Evolve ")
-                }
-                withStyle(
-                    SpanStyle(
-                        fontFamily = monteNormal,
-                        color = textColor,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Normal
-                    )
-                ) {
-                    append("with AI")
-                }
-            }, modifier = Modifier.padding(end = 10.dp))
-            ProfileImage(
-                imageUrl = imageUrl,
+        Column {
+            Row(
                 modifier = Modifier
-                    .size(50.dp)
-                    .border(
-                        brush = Brush.verticalGradient(
-                            colors = when (type) {
-                                "google" -> {
-                                    googleColors
-                                }
+                    .fillMaxWidth()
+                    .background(appGradient)
+                    .height(COLLAPSED_TOP_BAR_HEIGHT)
+                    .padding(vertical = 10.dp, horizontal = 20.dp)
+                    .graphicsLayer {
+                        translationY = -scroll.firstVisibleItemIndex.toFloat() / 2f
+                    },
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text = buildAnnotatedString {
+                    withStyle(
+                        style = SpanStyle(
+                            fontFamily = ybc,
+                            color = textColor,
+                            fontSize = 32.sp,
+                            fontWeight = FontWeight.Black
+                        )
+                    ) {
+                        append("Evolve ")
+                    }
+                    withStyle(
+                        SpanStyle(
+                            fontFamily = monteNormal,
+                            color = textColor,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Normal
+                        )
+                    ) {
+                        append("with AI")
+                    }
+                }, modifier = Modifier.padding(end = 10.dp))
+                ProfileImage(
+                    imageUrl = imageUrl,
+                    modifier = Modifier
+                        .size(50.dp)
+                        .border(
+                            brush = Brush.verticalGradient(
+                                colors = when (type) {
+                                    "google" -> {
+                                        googleColors
+                                    }
 
-                                "twitter" -> {
-                                    twitterColors
-                                }
+                                    "twitter" -> {
+                                        twitterColors
+                                    }
 
-                                "github" -> {
-                                    githubColors
-                                }
+                                    "github" -> {
+                                        githubColors
+                                    }
 
-                                else -> {
-                                    listOf(Color.White, Color.White)
+                                    else -> {
+                                        listOf(Color.White, Color.White)
+                                    }
                                 }
-                            }
-                        ), shape = CircleShape, width = 1.dp
-                    )
-                    .clip(CircleShape),
-            )
+                            ), shape = CircleShape, width = 1.dp
+                        )
+                        .clip(CircleShape),
+                )
 
+            }
+            Divider(thickness = 1.dp, color = textColor.copy(0.5f))
         }
     }
 }
@@ -400,94 +418,101 @@ fun NewChatBottomBar(
     val keyboardController = LocalSoftwareKeyboardController.current
     val isKeyboardOpen by keyboardAsState()
     Log.i("Messages", viewModel.listOfMessages.value.toString())
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.primary)
-            .padding(
-                start = 10.dp,
-                end = 10.dp,
-                top = 5.dp,
-                bottom = 16.dp
-            ),
-        horizontalArrangement = Arrangement.Start,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        if (isKeyboardOpen == Keyboard.Closed) {
-            Icon(
-                painter = painterResource(id = R.drawable.sparkle),
-                contentDescription = "Share",
-                tint = textColor,
-                modifier = Modifier
-                    .size(35.dp)
-                    .padding(end = 10.dp)
-            )
-            Icon(
-                painter = painterResource(id = R.drawable.photo),
-                contentDescription = "Photos",
-                tint = textColor,
-                modifier = Modifier
-                    .size(35.dp)
-                    .padding(end = 10.dp)
-                    .clickable {
-                        navController.navigate(Screens.ModalCamera.route)
-                    }
-            )
-            Icon(
-                painter = painterResource(id = R.drawable.mic),
-                contentDescription = "Microphone",
-                tint = textColor,
-                modifier = Modifier
-                    .size(39.dp)
-                    .padding(end = 10.dp)
-                    .clickable {
-                        onSpeechToText()
-                    }
-            )
-        }
+    Column {4
+        Divider(thickness = 1.dp, color = textColor.copy(0.5f), modifier = Modifier.padding(vertical =4.dp))
         Row(
-            modifier = Modifier.fillMaxWidth(0.8f),
-            horizontalArrangement = Arrangement.Center
+            modifier = modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.primary)
+                .padding(
+                    start = 10.dp,
+                    end = 10.dp,
+                    top = 0.dp,
+                    bottom = 16.dp
+                ),
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            val containerColor = MaterialTheme.colorScheme.onTertiaryContainer
-            OutlinedTextField(
-                value = text,
-                onValueChange = {
-                    onTextChange(it)
-                },
-                label = {
-                    Text(text = "Ask me anything", color = textColor)
-                },
-                shape = RoundedCornerShape(20.dp),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = containerColor,
-                    unfocusedContainerColor = containerColor,
-                    disabledContainerColor = containerColor,
-                    focusedTextColor = textColor,
-                    unfocusedTextColor = textColor
+            if (isKeyboardOpen == Keyboard.Closed) {
+                Icon(
+                    painter = painterResource(id = R.drawable.sparkle),
+                    contentDescription = "Share",
+                    tint = greenText,
+                    modifier = Modifier
+                        .size(35.dp)
+                        .padding(end = 10.dp)
                 )
-            )
+                Icon(
+                    painter = painterResource(id = R.drawable.photo),
+                    contentDescription = "Photos",
+                    tint = blueTint,
+                    modifier = Modifier
+                        .size(35.dp)
+                        .padding(end = 10.dp)
+                        .clickable {
+                            navController.navigate(Screens.ModalCamera.route)
+                        }
+                )
+                Icon(
+                    painter = painterResource(id = R.drawable.mic),
+                    contentDescription = "Microphone",
+                    tint = blueTint,
+                    modifier = Modifier
+                        .size(39.dp)
+                        .padding(end = 10.dp)
+                        .clickable {
+                            onSpeechToText()
+                        }
+                )
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(0.8f),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                val containerColor = MaterialTheme.colorScheme.primary
+                OutlinedTextField(
+                    value = text,
+                    onValueChange = {
+                        onTextChange(it)
+                    },
+                    label = {
+                        Text(text = "Ask me anything", color = textColor)
+                    },
+                    shape = RoundedCornerShape(20.dp),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = containerColor,
+                        unfocusedContainerColor = containerColor,
+                        disabledContainerColor = containerColor,
+                        focusedTextColor = textColor,
+                        unfocusedTextColor = textColor,
+
+                    ),
+                    modifier = Modifier
+                        .padding(10.dp)
+
+                )
+
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.send),
+                    contentDescription = "Send",
+                    tint = blueTint,
+                    modifier = Modifier
+                        .size(39.dp)
+                        .padding(end = 10.dp)
+                        .clickable {
+                            onClick()
+                            keyboardController?.hide()
+                        }
+                )
+            }
+
 
         }
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.send),
-                contentDescription = "Send",
-                tint = textColor,
-                modifier = Modifier
-                    .size(39.dp)
-                    .padding(end = 10.dp)
-                    .clickable {
-                        onClick()
-                        keyboardController?.hide()
-                    }
-            )
-        }
-
-
     }
 }
 

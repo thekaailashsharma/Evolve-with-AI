@@ -147,7 +147,8 @@ class MainViewModel @Inject constructor(
                     time = System.currentTimeMillis(),
                     message = apiData.value?.candidates?.get(0)?.output ?: "Something went wrong.",
                     isUser = false,
-                    uID = uid.value
+                    uID = uid.value,
+                    name = if (isSaved.value) savedName.value else "New Chat",
                 )
             )
             Log.i("Messages API Called", listOfMessages.value.toString())

@@ -5,8 +5,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -22,6 +24,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.test.palmapi.ui.theme.textColor
 
 @Composable
 fun BottomBar(navController: NavController) {
@@ -37,6 +40,7 @@ fun BottomBar(navController: NavController) {
         elevation = CardDefaults.cardElevation(5.dp),
         shape = RoundedCornerShape(0.dp)
     ) {
+        Divider(thickness = 1.dp, color = textColor.copy(0.5f))
         NavigationBar(
             modifier = Modifier
                 .height(80.dp),

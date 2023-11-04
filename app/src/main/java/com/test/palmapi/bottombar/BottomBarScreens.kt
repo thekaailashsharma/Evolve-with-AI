@@ -6,7 +6,7 @@ sealed class BottomBarScreens(val route: String?, val title: String?, val icon: 
     object DashboardScreen : BottomBarScreens(
         Screens.Home.route,
         "Home",
-        com.test.palmapi.R.drawable.home
+        com.test.palmapi.R.drawable.appicon
     )
 
     object GenerateScreen : BottomBarScreens(

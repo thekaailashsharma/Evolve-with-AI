@@ -4,6 +4,7 @@ import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.provider.Settings
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -50,6 +52,7 @@ import com.test.palmapi.services.TypesOfService.Keyboard
 import com.test.palmapi.services.TypesOfService.TextRecognition
 import com.test.palmapi.services.TypesOfService.TextToImage
 import com.test.palmapi.ui.theme.appGradient
+import com.test.palmapi.ui.theme.buttonColor
 import com.test.palmapi.ui.theme.monteSB
 import com.test.palmapi.ui.theme.textColor
 import com.test.palmapi.utils.updateTransitionData
@@ -280,7 +283,8 @@ fun ServicesCard(
             containerColor = Color.Transparent,
         ),
         shape = RoundedCornerShape(15.dp),
-        elevation = CardDefaults.cardElevation(0.dp)
+        elevation = CardDefaults.cardElevation(0.dp),
+        border = BorderStroke(1.dp, textColor.copy(0.5f))
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -356,7 +360,11 @@ fun ServicesCard(
                                     .padding(horizontal = 5.dp),
                                 onClick = {
                                     ctx.startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS))
-                                }
+                                },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = buttonColor,
+                                    contentColor = textColor
+                                )
                             ) {
                                 Text(
                                     text = "Enable Evolve AI Keyboard",
@@ -366,11 +374,17 @@ fun ServicesCard(
                             }
                         }
                         Spacer(modifier = Modifier.height(5.dp))
-                        Button(modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 5.dp), onClick = {
-                            inputMethodManager.showInputMethodPicker()
-                        }) {
+                        Button(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 5.dp), onClick = {
+                                inputMethodManager.showInputMethodPicker()
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = buttonColor,
+                                contentColor = textColor
+                            )
+                        ) {
                             Text(
                                 text = "Select Keyboard",
                                 fontSize = 10.sp,
@@ -404,7 +418,11 @@ fun ServicesCard(
                                     .padding(horizontal = 5.dp),
                                 onClick = {
                                     openAccessibilitySettings(ctx)
-                                }
+                                },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = buttonColor,
+                                    contentColor = textColor
+                                )
                             ) {
                                 Text(
                                     text = "Enable Accessibility",
@@ -440,7 +458,11 @@ fun ServicesCard(
                                 .padding(horizontal = 5.dp),
                             onClick = {
                                 navController.navigate(Screens.TextToImage.route)
-                            }
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = buttonColor,
+                                contentColor = textColor
+                            )
                         ) {
                             Text(
                                 text = "Generate Image",
@@ -466,7 +488,11 @@ fun ServicesCard(
                             onClick = {
 
                             },
-                            enabled = true
+                            enabled = true,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = buttonColor,
+                                contentColor = textColor
+                            )
                         ) {
                             Text(
                                 text = "Coming Soon",

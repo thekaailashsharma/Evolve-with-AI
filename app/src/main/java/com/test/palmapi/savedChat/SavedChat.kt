@@ -192,7 +192,8 @@ fun SavedChat(
                                     message = text.value.text,
                                     time = System.currentTimeMillis(),
                                     isUser = true,
-                                    uID = uid
+                                    uID = uid,
+                                    name = viewModel.savedName.value
                                 )
                             )
                             viewModel.message.value = text.value.text

@@ -86,13 +86,21 @@ val textColor: Color
     @Composable
     get() = MaterialTheme.colorScheme.surface
 
+val blueTint: Color
+    @Composable
+    get() = Color(0xFF5FA3F7)
+
 val buttonColor: Color
     @Composable
     get() = MaterialTheme.colorScheme.primaryContainer
 
 val CardColor: Color
     @Composable
-    get() = MaterialTheme.colorScheme.tertiary
+    get() = MaterialTheme.colorScheme.secondary
+
+val greenText: Color
+    @Composable
+    get() = Color(0xFF59FD59)
 
 fun openDeviceThemeSettings(context: Context) {
     val intent = Intent(Settings.ACTION_DISPLAY_SETTINGS)

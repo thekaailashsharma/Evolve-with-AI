@@ -52,6 +52,7 @@ import com.test.palmapi.login.ProfileImage
 import com.test.palmapi.navigation.Screens
 import com.test.palmapi.ui.theme.CardColor
 import com.test.palmapi.ui.theme.appGradient
+import com.test.palmapi.ui.theme.greenText
 import com.test.palmapi.ui.theme.monteSB
 import com.test.palmapi.ui.theme.textColor
 import com.test.palmapi.utils.CollapsedTopBarHomeScreen
@@ -313,7 +314,7 @@ fun SavedCard(
             Text(
                 text = timeStamp,
                 modifier = Modifier.padding(0.dp),
-                color = textColor,
+                color = greenText,
                 fontSize = 10.sp,
                 fontFamily = monteSB
             )

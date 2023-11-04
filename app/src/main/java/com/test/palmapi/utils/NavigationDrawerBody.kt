@@ -209,7 +209,7 @@ fun NavigationDrawer(
                     state = isDarkThemEnabled,
                     onStateChange = {
                         coroutineScope.launch {
-                            datastore.saveTheme(ThemeMode.AquaBliss.name)
+                            datastore.saveTheme(ThemeMode.Black.name)
                         }
 //                        openDeviceThemeSettings(context)
 //                        Toast.makeText(

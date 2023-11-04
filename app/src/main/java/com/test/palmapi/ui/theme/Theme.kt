@@ -13,10 +13,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import com.test.palmapi.datastore.UserDatastore
-import com.test.palmapi.ui.theme.colorPalette.AquaBlissColors
+import com.test.palmapi.ui.theme.colorPalette.BlackColors
 import com.test.palmapi.ui.theme.colorPalette.CelestialColors
-import com.test.palmapi.ui.theme.colorPalette.CornSilkColors
-import com.test.palmapi.ui.theme.colorPalette.RetrofuturistColors
+import com.test.palmapi.ui.theme.colorPalette.DarkColors
+import com.test.palmapi.ui.theme.colorPalette.LightColors
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
@@ -51,16 +51,16 @@ fun PalmApiTheme(
     val currentTheme by datastore.getTheme.collectAsState(initial = ThemeMode.Celestial.name)
     val themeMode = when (currentTheme) {
         ThemeMode.Celestial.name -> ThemeMode.Celestial
-        ThemeMode.Retrofuturist.name -> ThemeMode.Retrofuturist
-        ThemeMode.AquaBliss.name -> ThemeMode.AquaBliss
-        ThemeMode.CornSilk.name -> ThemeMode.CornSilk
-        else -> ThemeMode.Celestial
+        ThemeMode.Black.name -> ThemeMode.Black
+        ThemeMode.Dark.name -> ThemeMode.Dark
+        ThemeMode.Light.name -> ThemeMode.Light
+        else -> ThemeMode.Light
     }
     val colorScheme = when (themeMode) {
         ThemeMode.Celestial -> CelestialColors
-        ThemeMode.Retrofuturist -> RetrofuturistColors
-        ThemeMode.CornSilk -> CornSilkColors
-        ThemeMode.AquaBliss -> AquaBlissColors
+        ThemeMode.Light -> LightColors
+        ThemeMode.Dark -> DarkColors
+        ThemeMode.Black -> BlackColors
     }
 
 

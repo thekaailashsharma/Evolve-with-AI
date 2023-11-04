@@ -2,6 +2,7 @@ package com.test.palmapi.theming
 
 import android.content.Intent
 import android.os.Looper
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -19,6 +20,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -52,6 +54,7 @@ import com.test.palmapi.BaseActivity
 import com.test.palmapi.R
 import com.test.palmapi.bottombar.BottomBar
 import com.test.palmapi.datastore.UserDatastore
+import com.test.palmapi.ui.theme.CardColor
 import com.test.palmapi.ui.theme.ThemeMode
 import com.test.palmapi.ui.theme.appGradient
 import com.test.palmapi.ui.theme.monteSB
@@ -68,30 +71,30 @@ data class Themes(
 
 val themeRow1 = listOf(
     Themes(
-        name = "Celestial",
-        desc = "Serene blues and whites.",
-        image = R.drawable.theme_celestial,
-        themeMode = ThemeMode.Celestial
+        name = "Light Theme",
+        desc = "Misty Whites and Blues.",
+        image = R.drawable.theme_light,
+        themeMode = ThemeMode.Light
     ),
     Themes(
-        name = "Aqua Bliss",
+        name = "Dark Theme",
         desc = "Refreshing blues, vibrant aquas.",
-        image = R.drawable.theme_aquabliss,
-        themeMode = ThemeMode.AquaBliss
+        image = R.drawable.theme_blue,
+        themeMode = ThemeMode.Dark
     ),
 )
 val themeRow2 = listOf(
     Themes(
-        name = "Retrofuturist",
-        desc = "Vibrant purples, neon accents.",
-        image = R.drawable.theme_retrofuturist,
-        themeMode = ThemeMode.Retrofuturist
+        name = "Black Theme",
+        desc = "Vibrant Black, with blues.",
+        image = R.drawable.theme_black,
+        themeMode = ThemeMode.Black
     ),
     Themes(
-        name = "Cornsilk",
+        name = "Aesthetic Theme",
         desc = "Soothing, blend of colors.",
-        image = R.drawable.theme_cornsilk,
-        themeMode = ThemeMode.CornSilk
+        image = R.drawable.theme_celestial,
+        themeMode = ThemeMode.Celestial
     ),
 )
 
@@ -295,7 +298,8 @@ fun ChooseThemesCard(
             containerColor = Color.Transparent,
         ),
         shape = RoundedCornerShape(15.dp),
-        elevation = CardDefaults.cardElevation(0.dp)
+        elevation = CardDefaults.cardElevation(0.dp),
+        border = BorderStroke(1.dp, textColor.copy(0.5f))
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -348,7 +352,11 @@ fun ChooseThemesCard(
                         dataStore.saveTheme(themeMode.name)
                     }
                 },
-                shape = RoundedCornerShape(10.dp)
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = CardColor,
+                    contentColor = textColor
+                ),
             ) {
                 Text(
                     text = "Apply",

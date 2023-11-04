@@ -102,6 +102,7 @@ import com.test.palmapi.database.chats.ChatMessage
 import com.test.palmapi.login.ProfileImage
 import com.test.palmapi.ui.theme.CardColor
 import com.test.palmapi.ui.theme.appGradient
+import com.test.palmapi.ui.theme.greenText
 import com.test.palmapi.ui.theme.monteBold
 import com.test.palmapi.ui.theme.monteNormal
 import com.test.palmapi.ui.theme.monteSB
@@ -534,7 +535,7 @@ fun ChatCard(
                         )
                 ),
             colors = CardDefaults.cardColors(
-                containerColor = Color.Transparent
+                containerColor = textColor.copy(0.20f)
             ),
             elevation = CardDefaults.cardElevation(
                 if (viewModel.isBlurred.value && !isContextMenuVisible)
@@ -543,13 +544,13 @@ fun ChatCard(
         ) {
             Row(
                 modifier = Modifier
-                    .padding(5.dp),
+                    .padding(6.dp),
                 horizontalArrangement = Arrangement.Start,
                 verticalAlignment = Alignment.Top
             ) {
                 Text(
                     text = text,
-                    color = textColor,
+                    color = if (isUser) textColor else greenText,
                     fontFamily = monteBold,
                     fontSize = 15.sp,
                     softWrap = true
@@ -620,7 +621,7 @@ fun ContextMenu(
         Row(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             modifier = Modifier
-                .padding(vertical = 4.dp, horizontal = 10.dp)
+                .padding(vertical = 0.dp, horizontal = 0.dp)
                 .background(appGradient)
         ) {
             ContextMenuCard(
