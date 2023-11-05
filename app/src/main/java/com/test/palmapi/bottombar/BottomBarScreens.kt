@@ -20,10 +20,17 @@ sealed class BottomBarScreens(val route: String?, val title: String?, val icon: 
         "Themes",
         com.test.palmapi.R.drawable.themes
     )
+
+    object DevicesScreen : BottomBarScreens(
+        Screens.Devices.route,
+        "Devices",
+        com.test.palmapi.R.drawable.cast
+    )
 }
 
 val items = listOf(
     BottomBarScreens.DashboardScreen,
     BottomBarScreens.GenerateScreen,
-    BottomBarScreens.ThemesScreen
+    BottomBarScreens.ThemesScreen,
+    BottomBarScreens.DevicesScreen
 )

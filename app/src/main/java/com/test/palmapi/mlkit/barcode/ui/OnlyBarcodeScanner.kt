@@ -9,6 +9,7 @@ import androidx.compose.material3.SheetState
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -76,4 +77,47 @@ fun BarCodeOnly() {
         }
 
     }
+}
+
+@OptIn(
+    ExperimentalPermissionsApi::class, ExperimentalComposeUiApi::class,
+    ExperimentalMaterial3Api::class
+)
+@androidx.annotation.OptIn(androidx.camera.core.ExperimentalGetImage::class)
+@Composable
+fun DeviceScanner(isScannerVisible: MutableState<Boolean>, code: MutableState<String>) {
+    val permissionState = rememberMultiplePermissionsState(
+        permissions = listOf(
+            Manifest.permission.CAMERA,
+        )
+    )
+    val permissionDrawerState = rememberBottomSheetScaffoldState(
+        if (permissionState.allPermissionsGranted) SheetState(
+            initialValue = SheetValue.Hidden,
+            skipPartiallyExpanded = true
+        )
+        else SheetState(
+            initialValue = SheetValue.Expanded,
+            skipPartiallyExpanded = true
+        )
+    )
+    val gesturesEnabled by remember { derivedStateOf { permissionState.allPermissionsGranted } }
+    Log.i("GesturesEnabled", gesturesEnabled.toString())
+    PermissionDrawer(
+        drawerState = permissionDrawerState,
+        model = R.drawable.camera,
+        permissionState = permissionState,
+        rationaleText = "To continue, allow " +
+                "${stringResource(id = R.string.app_name)} " +
+                "to access your device's mlkit Tap Settings > Permission, and turn " +
+                "\"Access Camera On\" on.",
+        withoutRationaleText = "Camera permission required for this feature to be available." +
+                " Please grant the permission.",
+        gesturesEnabled = gesturesEnabled,
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            CodeScannerView(code = code)
+        }
+    }
+
 }

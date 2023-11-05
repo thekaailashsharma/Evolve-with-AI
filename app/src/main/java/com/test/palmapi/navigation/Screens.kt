@@ -12,5 +12,6 @@ sealed class Screens(val route: String){
     object PromptChat : Screens("promptChat")
     object Themes : Screens("themes")
     object TextToImage : Screens("textToImage")
+    object Devices : Screens("devices")
 
 }

@@ -23,6 +23,7 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.test.palmapi.MainViewModel
 import com.test.palmapi.datastore.UserDatastore
+import com.test.palmapi.devices.DevicesScreen
 import com.test.palmapi.home.HomeScreen
 import com.test.palmapi.login.LoginScreen
 import com.test.palmapi.mlkit.ModalCamera
@@ -56,13 +57,13 @@ fun NavController(dynamicLink: String) {
     val pfp = dataStore.getPfp.collectAsState(initial = "")
     val uid = dataStore.getUID.collectAsState(initial = "")
     var type by remember { mutableStateOf("") }
-//    LaunchedEffect(key1 = viewModel.getType(uid.value)) {
-//        if (uid.value != "") {
-//            viewModel.getType(uid.value).collectLatest {
-//                type = it.type
-//            }
-//        }
-//    }
+    LaunchedEffect(key1 = viewModel.getType(uid.value)) {
+        if (uid.value != "") {
+            viewModel.getType(uid.value).collectLatest {
+                type = it.type
+            }
+        }
+    }
 
     NavHost(
         navController = navController,
@@ -172,6 +173,16 @@ fun NavController(dynamicLink: String) {
                 viewModel = viewModel,
                 navHostController = navController,
                 userPfp = pfp.value
+            )
+        }
+
+        composable(Screens.Devices.route){
+            DevicesScreen(
+                email = email.value,
+                viewModel = viewModel,
+                pfp = pfp.value,
+                name = name.value,
+                navHostController = navController
             )
         }
     }

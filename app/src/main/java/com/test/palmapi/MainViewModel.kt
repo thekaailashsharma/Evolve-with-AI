@@ -18,6 +18,9 @@ import com.test.palmapi.login.SignInResult
 import com.test.palmapi.login.SignInState
 import com.test.palmapi.repository.ApiService
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.appwrite.Client
+import io.appwrite.models.Collection
+import io.appwrite.services.Databases
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -59,6 +62,18 @@ class MainViewModel @Inject constructor(
     private val _imageState = MutableStateFlow<ImageState>(ImageState.NotStarted)
     val imageState: StateFlow<ImageState> = _imageState.asStateFlow()
 
+    // StateFlow to manage image loading state
+    private val _devices = MutableStateFlow<Collection?>(null)
+    val devices: StateFlow<Collection?> = _devices.asStateFlow()
+
+    private val _isValidQR = MutableStateFlow<Boolean>(false)
+    val validQR: StateFlow<Boolean> = _isValidQR.asStateFlow()
+
+    private val _isRegistered = MutableStateFlow<Boolean>(false)
+    val isRegistered: StateFlow<Boolean> = _isRegistered.asStateFlow()
+
+    private val _isConnected = MutableStateFlow<Boolean>(false)
+    val isConnected: StateFlow<Boolean> = _isConnected.asStateFlow()
     init {
         viewModelScope.launch {
             datastore.getUID.collectLatest {
@@ -125,6 +140,8 @@ class MainViewModel @Inject constructor(
                     type = type
                 )
             )
+
+            createCollection(email, firstName)
         }
     }
 
@@ -185,6 +202,162 @@ class MainViewModel @Inject constructor(
             dbRepository.deleteMessage(time)
         }
     }
+
+    fun getDevices(email: String) {
+        viewModelScope.launch {
+            try {
+                val client = setUpClient()
+
+                val databases = Databases(client)
+
+                val response = databases.getCollection(
+                    databaseId = "logged-in",
+                    collectionId = email.substringBefore("@")
+                )
+                _devices.value = response
+
+
+            } catch (e: Exception) {
+                Log.i("Appwrite Exception", e.toString())
+            }
+        }
+    }
+
+    fun validateQr(data: String) {
+        viewModelScope.launch {
+            try {
+                val client = setUpClient()
+                val databases = Databases(client)
+                val response = databases.listCollections(
+                    databaseId = "generated-qr",
+                )
+
+                response.collections.forEach {
+                    Log.i("Appwrite Validation: data", data)
+                    Log.i("Appwrite Validation: name", it.id)
+                    if (it.id == data) {
+                        Log.i("Appwrite Validation", it.toString())
+                        _isValidQR.value = true
+                    }
+                }
+            } catch (e: Exception) {
+                Log.i("Appwrite Exception", e.toString())
+                _isValidQR.value = false
+            }
+        }
+    }
+
+    fun successfullyRegister(
+        data: String,
+        deleteCollectionID: String,
+        userCollectionID: String,
+        email: String,
+        name: String,
+        pfp: String
+    ) {
+        viewModelScope.launch {
+            _isRegistered.value = true
+            try {
+                deleteCollection(deleteCollectionID)
+                val client = setUpClient()
+                val databases = Databases(client)
+                delay(1000)
+                val response = databases.createCollection(
+                    databaseId = "mapping",
+                    collectionId = data,
+                    name = email.substringBefore("@"),
+                )
+                val emailResponse = databases.createEmailAttribute(
+                    databaseId = "logged-in",
+                    collectionId = userCollectionID,
+                    key = "email",
+                    required = false,
+                )
+                val pfpResponse = databases.createStringAttribute(
+                    databaseId = "logged-in",
+                    collectionId = userCollectionID,
+                    key = "pfp",
+                    required = false,
+                    default = pfp,
+                    size = 70
+                )
+                delay(1000)
+                val nameResponse = databases.createStringAttribute(
+                    databaseId = "logged-in",
+                    collectionId = userCollectionID,
+                    key = "name",
+                    size = 40,
+                    required = false,
+                    default = name
+                )
+                val qrResponse = databases.createStringAttribute(
+                    databaseId = "logged-in",
+                    collectionId = userCollectionID,
+                    key = "qrcode",
+                    required = false,
+                    default = data,
+                    size = 30
+                )
+                val boolResponse = databases.createBooleanAttribute(
+                    databaseId = "logged-in",
+                    collectionId = userCollectionID,
+                    key = "isSuccessful",
+                    required = false,
+                    default = true
+                )
+
+                _isRegistered.value = false
+                _isConnected.value = true
+            } catch (e: Exception) {
+                Log.i("Appwrite Exception", e.toString())
+            }
+        }
+    }
+
+    private fun deleteCollection(collectionID: String, databaseID: String = "generated-qr"){
+        viewModelScope.launch {
+            try {
+                val client = setUpClient()
+                val databases = Databases(client)
+                val response = databases.deleteCollection(
+                    databaseId = databaseID,
+                    collectionId = collectionID
+                )
+            } catch (e: Exception) {
+                Log.i("Appwrite Exception", e.toString())
+            }
+        }
+
+    }
+
+    private fun createCollection(email: String, name: String) {
+        viewModelScope.launch {
+            try {
+                val client = setUpClient()
+                val databases = Databases(client)
+                val response = databases.createCollection(
+                    databaseId = "logged-in",
+                    collectionId = email.substringBefore("@"),
+                    name = name,
+                )
+            } catch (e: Exception) {
+                Log.i("Appwrite Exception", e.toString())
+            }
+        }
+    }
+
+    private fun setUpClient(): Client {
+        return Client()
+            .setEndpoint("https://cloud.appwrite.io/v1") // Your API Endpoint
+            .setProject("65469b6cbb0b40e8a44f") // Your project ID
+            .setKey(
+                "3b14bdc3f720db0253fe51192d31dc31df2f7051976dcaa760a94f81eb68525b25bfca177936b1cde4" +
+                        "d8ad6fd6f87911aebcbaeba9ec6d7ec837a304ebcb0c8471beedd950ca2b0cac452e17c70594f455538" +
+                        "b770a967ee73d2db954592fd632e81eff2be3b06c2e01f19ea0aaa05adc78a60c228e1fdf9453ec240" +
+                        "b956f8b36"
+            )
+    }
+
 }
 
 sealed class ImageState {
@@ -210,4 +383,5 @@ sealed class ImageState {
 
     object NotStarted : ImageState()
 }
+
 

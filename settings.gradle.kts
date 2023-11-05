@@ -5,6 +5,7 @@ pluginManagement {
         gradlePluginPortal()
         maven(url = "dl.bintray.com/jetbrains/markdown")
         maven(url = "https://jitpack.io")
+        maven(url = "https://s01.oss.sonatype.org/content/repositories/snapshots/")
     }
 }
 dependencyResolutionManagement {
@@ -14,6 +15,7 @@ dependencyResolutionManagement {
         mavenCentral()
         maven(url = "dl.bintray.com/jetbrains/markdown")
         maven(url = "https://jitpack.io")
+        maven(url = "https://s01.oss.sonatype.org/content/repositories/snapshots/")
     }
 }
 

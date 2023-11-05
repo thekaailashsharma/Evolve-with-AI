@@ -331,8 +331,8 @@ fun CollapsedTopBarHomeScreen(
 ) {
     AnimatedVisibility(
         visible = isCollapsed,
-        enter = expandVertically(animationSpec = tween(durationMillis = 300)) + fadeIn(),
-        exit = shrinkVertically(animationSpec = tween(durationMillis = 300)) + fadeOut()
+        enter = expandVertically(animationSpec = tween()) + fadeIn(),
+        exit = shrinkVertically(animationSpec = tween()) + fadeOut()
     ) {
         Column {
             Row(

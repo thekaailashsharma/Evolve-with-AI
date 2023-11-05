@@ -175,6 +175,9 @@ dependencies {
     implementation("de.mr-pine.utils:zoomables:1.1.2")
     implementation("androidx.compose.ui:ui-util")
 
+    // Appwrite
+    implementation("io.appwrite:sdk-for-kotlin:4.0.0")
+
     //Test Android
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)
