@@ -60,6 +60,7 @@ fun NavController(dynamicLink: String) {
     LaunchedEffect(key1 = viewModel.getType(uid.value)) {
         if (uid.value != "") {
             viewModel.getType(uid.value).collectLatest {
+                Log.i("Typessssssssss", it.type)
                 type = it.type
             }
         }

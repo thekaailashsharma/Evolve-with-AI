@@ -157,6 +157,17 @@ fun LoginScreen(navHostController: NavHostController, viewModel: MainViewModel) 
                 Toast.LENGTH_LONG
             ).show()
             coroutineScope.launch {
+                viewModel.addAccount(
+                    email = googleAuthUiClient.getSignedInUser()?.email ?: "",
+                    firstName = googleAuthUiClient.getSignedInUser()?.username?.substringBefore(" ")
+                        ?: "",
+                    lastName = googleAuthUiClient.getSignedInUser()?.username?.substringAfter(" ")
+                        ?: "",
+                    photoUrl = googleAuthUiClient.getSignedInUser()?.profilePictureUrl ?: "",
+                    uniqueId = googleAuthUiClient.getSignedInUser()?.uniqueId ?: "",
+                    type = "google",
+                    isCurrent = true
+                )
                 dataStore.saveEmail(googleAuthUiClient.getSignedInUser()?.email ?: "")
                 dataStore.saveName(googleAuthUiClient.getSignedInUser()?.username ?: "")
                 dataStore.savePfp(googleAuthUiClient.getSignedInUser()?.profilePictureUrl ?: "")
@@ -168,17 +179,6 @@ fun LoginScreen(navHostController: NavHostController, viewModel: MainViewModel) 
                     googleAuthUiClient.getSignedInUser()?.profilePictureUrl ?: "",
                     googleAuthUiClient.getSignedInUser()?.uniqueId ?: "",
                     "google"
-                )
-                viewModel.addAccount(
-                    email = googleAuthUiClient.getSignedInUser()?.email ?: "",
-                    firstName = googleAuthUiClient.getSignedInUser()?.username?.substringBefore(" ")
-                        ?: "",
-                    lastName = googleAuthUiClient.getSignedInUser()?.username?.substringAfter(" ")
-                        ?: "",
-                    photoUrl = googleAuthUiClient.getSignedInUser()?.profilePictureUrl ?: "",
-                    uniqueId = googleAuthUiClient.getSignedInUser()?.uniqueId ?: "",
-                    type = "google",
-                    isCurrent = true
                 )
             }
 
@@ -194,6 +194,17 @@ fun LoginScreen(navHostController: NavHostController, viewModel: MainViewModel) 
             Log.i("Auth-Client2.0", googleAuthUiClient.getSignedInUser()?.username ?: "")
             Log.i("Auth-Client2.0", googleAuthUiClient.getSignedInUser()?.profilePictureUrl ?: "")
             coroutineScope.launch {
+                viewModel.addAccount(
+                    email = googleAuthUiClient.getSignedInUser()?.email ?: "",
+                    firstName = googleAuthUiClient.getSignedInUser()?.username?.substringBefore(" ")
+                        ?: "",
+                    lastName = googleAuthUiClient.getSignedInUser()?.username?.substringAfter(" ")
+                        ?: "",
+                    photoUrl = googleAuthUiClient.getSignedInUser()?.profilePictureUrl ?: "",
+                    uniqueId = googleAuthUiClient.getSignedInUser()?.uniqueId ?: "",
+                    type = "google",
+                    isCurrent = true
+                )
                 dataStore.saveEmail(googleAuthUiClient.getSignedInUser()?.email ?: "")
                 dataStore.saveName(googleAuthUiClient.getSignedInUser()?.username ?: "")
                 dataStore.savePfp(googleAuthUiClient.getSignedInUser()?.profilePictureUrl ?: "")
@@ -205,17 +216,6 @@ fun LoginScreen(navHostController: NavHostController, viewModel: MainViewModel) 
                     googleAuthUiClient.getSignedInUser()?.profilePictureUrl ?: "",
                     googleAuthUiClient.getSignedInUser()?.uniqueId ?: "",
                     "google"
-                )
-                viewModel.addAccount(
-                    email = googleAuthUiClient.getSignedInUser()?.email ?: "",
-                    firstName = googleAuthUiClient.getSignedInUser()?.username?.substringBefore(" ")
-                        ?: "",
-                    lastName = googleAuthUiClient.getSignedInUser()?.username?.substringAfter(" ")
-                        ?: "",
-                    photoUrl = googleAuthUiClient.getSignedInUser()?.profilePictureUrl ?: "",
-                    uniqueId = googleAuthUiClient.getSignedInUser()?.uniqueId ?: "",
-                    type = "google",
-                    isCurrent = true
                 )
             }
 
