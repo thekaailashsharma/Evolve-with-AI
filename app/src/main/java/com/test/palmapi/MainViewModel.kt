@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 @HiltViewModel
@@ -74,6 +75,10 @@ class MainViewModel @Inject constructor(
 
     private val _isConnected = MutableStateFlow<Boolean>(false)
     val isConnected: StateFlow<Boolean> = _isConnected.asStateFlow()
+
+    private val _isLoggedIn = MutableStateFlow(false)
+    val isLoggedIn: StateFlow<Boolean> = _isLoggedIn.asStateFlow()
+
     init {
         viewModelScope.launch {
             datastore.getUID.collectLatest {
@@ -116,6 +121,32 @@ class MainViewModel @Inject constructor(
 
     fun resetState() {
         _state.update { SignInState() }
+    }
+
+    fun isUserLoggedIn(userEmail: String) {
+
+        val kk = runBlocking {
+            if (userEmail == "") {
+                return@runBlocking false
+            } else {
+                try {
+                    val client = setUpClient()
+                    val databases = Databases(client)
+                    extractBooleanAttributeData(
+                        databases.getAttribute(
+                            databaseId = "logged-in",
+                            collectionId = userEmail,
+                            key = "isSuccessful"
+                        )
+                    )?.default ?: false
+                } catch (e: Exception) {
+                    return@runBlocking false
+                }
+            }
+
+        }
+        _isLoggedIn.value = kk
+
     }
 
     fun addAccount(
@@ -247,6 +278,25 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    fun invalidateQr() {
+        _isValidQR.value = false
+    }
+
+    fun logOut(userCollectionID: String) {
+        viewModelScope.launch {
+            val client = setUpClient()
+            val databases = Databases(client)
+            val boolResponse = databases.updateBooleanAttribute(
+                databaseId = "logged-in",
+                collectionId = userCollectionID,
+                key = "isSuccessful",
+                required = false,
+                default = false
+            )
+            _isLoggedIn.value = false
+        }
+    }
+
     fun successfullyRegister(
         data: String,
         deleteCollectionID: String,
@@ -267,45 +317,43 @@ class MainViewModel @Inject constructor(
                     collectionId = data,
                     name = email.substringBefore("@"),
                 )
-                val emailResponse = databases.createEmailAttribute(
+                val emailResponse = databases.updateEmailAttribute(
                     databaseId = "logged-in",
                     collectionId = userCollectionID,
                     key = "email",
                     required = false,
+                    default = email
                 )
-                val pfpResponse = databases.createStringAttribute(
+                val pfpResponse = databases.updateStringAttribute(
                     databaseId = "logged-in",
                     collectionId = userCollectionID,
                     key = "pfp",
                     required = false,
                     default = pfp,
-                    size = 70
                 )
                 delay(1000)
-                val nameResponse = databases.createStringAttribute(
+                val nameResponse = databases.updateStringAttribute(
                     databaseId = "logged-in",
                     collectionId = userCollectionID,
                     key = "name",
-                    size = 40,
                     required = false,
                     default = name
                 )
-                val qrResponse = databases.createStringAttribute(
+                val qrResponse = databases.updateStringAttribute(
                     databaseId = "logged-in",
                     collectionId = userCollectionID,
                     key = "qrcode",
                     required = false,
                     default = data,
-                    size = 30
                 )
-                val boolResponse = databases.createBooleanAttribute(
+                val boolResponse = databases.updateBooleanAttribute(
                     databaseId = "logged-in",
                     collectionId = userCollectionID,
                     key = "isSuccessful",
                     required = false,
                     default = true
                 )
-
+                _isLoggedIn.value = true
                 _isRegistered.value = false
                 _isConnected.value = true
             } catch (e: Exception) {
@@ -314,7 +362,7 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    private fun deleteCollection(collectionID: String, databaseID: String = "generated-qr"){
+    private fun deleteCollection(collectionID: String, databaseID: String = "generated-qr") {
         viewModelScope.launch {
             try {
                 val client = setUpClient()
@@ -333,12 +381,51 @@ class MainViewModel @Inject constructor(
     private fun createCollection(email: String, name: String) {
         viewModelScope.launch {
             try {
+                val userCollectionID = email.substringBefore("@")
                 val client = setUpClient()
                 val databases = Databases(client)
                 val response = databases.createCollection(
                     databaseId = "logged-in",
                     collectionId = email.substringBefore("@"),
                     name = name,
+                )
+                val emailResponse = databases.createEmailAttribute(
+                    databaseId = "logged-in",
+                    collectionId = userCollectionID,
+                    key = "email",
+                    required = false,
+                )
+                val pfpResponse = databases.createStringAttribute(
+                    databaseId = "logged-in",
+                    collectionId = userCollectionID,
+                    key = "pfp",
+                    required = false,
+                    default = "",
+                    size = 270
+                )
+                delay(1000)
+                val nameResponse = databases.createStringAttribute(
+                    databaseId = "logged-in",
+                    collectionId = userCollectionID,
+                    key = "name",
+                    size = 40,
+                    required = false,
+                    default = name
+                )
+                val qrResponse = databases.createStringAttribute(
+                    databaseId = "logged-in",
+                    collectionId = userCollectionID,
+                    key = "qrcode",
+                    required = false,
+                    default = "",
+                    size = 30
+                )
+                val boolResponse = databases.createBooleanAttribute(
+                    databaseId = "logged-in",
+                    collectionId = userCollectionID,
+                    key = "isSuccessful",
+                    required = false,
+                    default = true
                 )
             } catch (e: Exception) {
                 Log.i("Appwrite Exception", e.toString())
@@ -382,6 +469,37 @@ sealed class ImageState {
     data class Error(val exception: Exception) : ImageState()
 
     object NotStarted : ImageState()
+}
+
+data class BooleanAttributeData(
+    val key: String,
+    val type: String,
+    val status: String,
+    val error: String?,
+    val required: Boolean,
+    val array: Boolean,
+    val default: Boolean
+)
+
+fun extractBooleanAttributeData(attribute: Any): BooleanAttributeData? {
+    return try {
+        val attributeMap = attribute as? Map<*, *>
+        if (attributeMap != null) {
+            val key = attributeMap["key"] as? String ?: ""
+            val type = attributeMap["type"] as? String ?: ""
+            val status = attributeMap["status"] as? String ?: ""
+            val error = attributeMap["error"] as? String
+            val required = attributeMap["required"] as? Boolean ?: false
+            val array = attributeMap["array"] as? Boolean ?: false
+            val default = attributeMap["default"] as? Boolean ?: false
+
+            BooleanAttributeData(key, type, status, error, required, array, default)
+        } else {
+            null // Invalid input, return null or throw an exception as needed
+        }
+    } catch (e: Exception) {
+        null // Handle exceptions by returning null or throw an exception as needed
+    }
 }
 
 
