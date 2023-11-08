@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -165,25 +166,32 @@ fun NoDevices(isScannerVisible: MutableState<Boolean>) {
 @Composable
 fun AllDevices(onLogOut: () -> Unit) {
 
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Icon(
-            painter = painterResource(id = R.drawable.macbook),
-            contentDescription = null,
-            tint = Color.Unspecified,
-            modifier = Modifier.size(160.dp)
-        )
-        Text(text = "Connected", color = blueTint)
-        Spacer(modifier = Modifier.height(30.dp))
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.macbook),
+                contentDescription = null,
+                tint = blueTint,
+                modifier = Modifier.size(140.dp)
+            )
+            Text(text = "Connected", color = blueTint)
+            Spacer(modifier = Modifier.height(30.dp))
 
-        Button(onClick = { onLogOut() }, colors = ButtonDefaults.buttonColors(
-            containerColor = buttonColor,
-            contentColor = blueTint
-        ), shape = RoundedCornerShape(10.dp)) {
-            Text(text = "Logout")
+        }
+        Box(modifier = Modifier.fillMaxSize().padding(bottom = 50.dp), contentAlignment = Alignment.BottomCenter) {
+            Button(
+                onClick = { onLogOut() }, colors = ButtonDefaults.buttonColors(
+                    containerColor = buttonColor,
+                    contentColor = blueTint
+                ), shape = RoundedCornerShape(10.dp)
+            ) {
+                Text(text = "Logout")
+            }
+
         }
 
     }

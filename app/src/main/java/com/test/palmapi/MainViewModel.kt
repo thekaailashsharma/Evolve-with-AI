@@ -125,27 +125,30 @@ class MainViewModel @Inject constructor(
 
     fun isUserLoggedIn(userEmail: String) {
 
-        val kk = runBlocking {
-            if (userEmail == "") {
-                return@runBlocking false
-            } else {
-                try {
-                    val client = setUpClient()
-                    val databases = Databases(client)
-                    extractBooleanAttributeData(
-                        databases.getAttribute(
-                            databaseId = "logged-in",
-                            collectionId = userEmail,
-                            key = "isSuccessful"
-                        )
-                    )?.default ?: false
-                } catch (e: Exception) {
-                    return@runBlocking false
-                }
-            }
+        viewModelScope.launch {
 
+            val kk = runBlocking {
+                if (userEmail == "") {
+                    return@runBlocking false
+                } else {
+                    try {
+                        val client = setUpClient()
+                        val databases = Databases(client)
+                        extractBooleanAttributeData(
+                            databases.getAttribute(
+                                databaseId = "logged-in",
+                                collectionId = userEmail,
+                                key = "isSuccessful"
+                            )
+                        )?.default ?: false
+                    } catch (e: Exception) {
+                        return@runBlocking false
+                    }
+                }
+
+            }
+            _isLoggedIn.value = kk
         }
-        _isLoggedIn.value = kk
 
     }
 
